@@ -8,8 +8,6 @@ type ContactPayload = {
   message?: string;
 };
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
 export async function POST(request: Request) {
@@ -45,6 +43,7 @@ export async function POST(request: Request) {
       );
     }
 
+    const resend = new Resend(process.env.RESEND_API_KEY);
     const { error } = await resend.emails.send({
       from: fromEmail,
       to: [toEmail],

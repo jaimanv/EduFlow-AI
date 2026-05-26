@@ -296,7 +296,20 @@ export default function ProductivityPage() {
     }
   };
 
-  const generateAiInsights = async () => {
+  const generateAiInsights = async (force = false) => {
+    const dataStateKey = `${stats.totalSessions}-${stats.totalMinutes}-${taskStats.totalTasks}-${taskStats.completedTasks}`;
+
+    if (!force) {
+      const cached = localStorage.getItem("productivity_insights_cache");
+      const cachedKey = localStorage.getItem("productivity_insights_state_key");
+      if (cached && cachedKey === dataStateKey) {
+        setGeneratedInsights(cached);
+        setAiInsightsLoading(false);
+        setAiInsightsTyping(false);
+        return;
+      }
+    }
+
     setAiInsightsLoading(true);
     setAiInsightsTyping(false);
     setAiInsightsError(null);
@@ -339,6 +352,9 @@ export default function ProductivityPage() {
       }
 
       const insights = data.answer.trim();
+      localStorage.setItem("productivity_insights_cache", insights);
+      localStorage.setItem("productivity_insights_state_key", dataStateKey);
+
       setGeneratedInsights("");
       setAiInsightsTyping(true);
 
@@ -363,6 +379,17 @@ export default function ProductivityPage() {
       setAiInsightsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (loading) return;
+    generateAiInsights(false);
+  }, [
+    loading,
+    stats.totalSessions,
+    stats.totalMinutes,
+    taskStats.totalTasks,
+    taskStats.completedTasks,
+  ]);
 
   return (
     <div className="px-6 py-8 max-w-6xl mx-auto space-y-8">
@@ -435,7 +462,7 @@ export default function ProductivityPage() {
         <div className="space-y-3">
           <button
             type="button"
-            onClick={generateAiInsights}
+            onClick={() => generateAiInsights(true)}
             disabled={aiInsightsLoading || aiInsightsTyping}
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
             style={{
@@ -453,7 +480,7 @@ export default function ProductivityPage() {
               ? "Thinking..."
               : aiInsightsTyping
                 ? "Typing insights..."
-                : "Analyze My Productivity"}
+                : "Refresh Insights"}
           </button>
           {aiInsightsLoading && (
             <div

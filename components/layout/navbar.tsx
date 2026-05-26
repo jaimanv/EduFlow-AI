@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../../lib/supabase";
 
@@ -16,10 +16,14 @@ const navLinks = [
 
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
+
+  const isDashboardOrAuth = pathname.startsWith("/dashboard") || pathname.startsWith("/auth");
+  const isSolid = scrolled || isDashboardOrAuth;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -59,12 +63,12 @@ export default function Navbar() {
     <header
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       style={{
-        background: scrolled ? "var(--ui-surface)" : "transparent",
-        borderBottom: scrolled
+        background: isSolid ? "var(--ui-surface)" : "transparent",
+        borderBottom: isSolid
           ? "1px solid var(--ui-border)"
           : "1px solid transparent",
-        backdropFilter: scrolled ? "blur(16px) saturate(1.4)" : "none",
-        WebkitBackdropFilter: scrolled ? "blur(16px) saturate(1.4)" : "none",
+        backdropFilter: isSolid ? "blur(16px) saturate(1.4)" : "none",
+        WebkitBackdropFilter: isSolid ? "blur(16px) saturate(1.4)" : "none",
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

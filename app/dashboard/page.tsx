@@ -413,6 +413,13 @@ export default function DashboardPage() {
     null,
   );
 
+  const [aiInsightsLoading, setAiInsightsLoading] = useState(false);
+  const [aiInsightsTyping, setAiInsightsTyping] = useState(false);
+  const [aiInsightsError, setAiInsightsError] = useState<string | null>(null);
+  const [generatedInsights, setGeneratedInsights] = useState<string | null>(
+    null,
+  );
+
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -572,6 +579,108 @@ export default function DashboardPage() {
       alive = false;
     };
   }, []);
+
+  const generateAiInsights = async (force = false) => {
+    const dataStateKey = `${productivitySessions}-${productivityTotalMinutes}-${taskTotal}-${taskDone}`;
+
+    if (!force) {
+      const cached = localStorage.getItem("productivity_insights_cache");
+      const cachedKey = localStorage.getItem("productivity_insights_state_key");
+      if (cached && cachedKey === dataStateKey) {
+        setGeneratedInsights(cached);
+        setAiInsightsLoading(false);
+        setAiInsightsTyping(false);
+        return;
+      }
+    }
+
+    setAiInsightsLoading(true);
+    setAiInsightsTyping(false);
+    setAiInsightsError(null);
+    setGeneratedInsights("Thinking...");
+
+    try {
+      const avgSessionDuration = productivitySessions
+        ? Math.round(productivityTotalMinutes / productivitySessions)
+        : 0;
+
+      const context = {
+        source: "productivity-tracker",
+        totalStudyHours: productivityTotalMinutes / 60,
+        totalSessions: productivitySessions,
+        avgSessionDuration,
+        todayStudyTime: productivityTodayMinutes,
+        totalTasks: taskTotal,
+        completedTasks: taskDone,
+        pendingTasks: taskPending,
+        upcomingDeadlines: [],
+      };
+
+      const response = await fetch("/api/doubt-solver", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          agentType: "productivity",
+          userMessage:
+            "Analyze my study productivity and give me actionable suggestions to improve.",
+          context,
+        }),
+      });
+
+      const data = (await response.json()) as {
+        answer?: string;
+        error?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Failed to generate productivity insights.",
+        );
+      }
+
+      if (!data.answer?.trim()) {
+        throw new Error("AI returned empty insights.");
+      }
+
+      const insights = data.answer.trim();
+      localStorage.setItem("productivity_insights_cache", insights);
+      localStorage.setItem("productivity_insights_state_key", dataStateKey);
+
+      setGeneratedInsights("");
+      setAiInsightsTyping(true);
+
+      let index = 0;
+      const chunkSize = 5;
+      const timer = window.setInterval(() => {
+        index += chunkSize;
+        setGeneratedInsights(insights.slice(0, index));
+
+        if (index >= insights.length) {
+          window.clearInterval(timer);
+          setAiInsightsTyping(false);
+        }
+      }, 10);
+    } catch (e) {
+      setAiInsightsError(
+        e instanceof Error ? e.message : "Failed to generate insights.",
+      );
+      setGeneratedInsights(null);
+      setAiInsightsTyping(false);
+    } finally {
+      setAiInsightsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (loading) return;
+    generateAiInsights(false);
+  }, [
+    loading,
+    productivitySessions,
+    productivityTotalMinutes,
+    taskTotal,
+    taskDone,
+  ]);
 
   const progressPct = useMemo(() => {
     if (!focusItems.length) return 0;
@@ -1321,6 +1430,118 @@ export default function DashboardPage() {
           />
         </div>
       </section>
+
+      {(!loading || generatedInsights || aiInsightsLoading) && (
+        <section
+          className="relative overflow-hidden rounded-2xl border border-teal-700/20 bg-[linear-gradient(135deg,rgba(240,253,250,0.98)_0%,rgba(204,251,241,0.78)_42%,rgba(255,255,255,0.94)_100%)] p-5 shadow-[0_18px_46px_rgba(15,118,110,0.14),inset_0_1px_0_rgba(255,255,255,0.78)] transition-colors duration-300 sm:p-6 dark:border-teal-200/20 dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.98)_0%,rgba(17,24,39,0.96)_48%,rgba(20,83,78,0.42)_100%)] dark:shadow-[0_18px_46px_rgba(0,0,0,0.36),inset_0_1px_0_rgba(94,234,212,0.10)]"
+        >
+          <div
+            className="absolute inset-x-6 top-0 h-px"
+            style={{
+              background:
+                "linear-gradient(90deg, transparent, rgba(20,184,166,0.44), transparent)",
+            }}
+          />
+          
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-2.5">
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{
+                  background: "rgba(110,231,216,0.14)",
+                  color: "#6EE7D8",
+                  border: "1px solid rgba(110,231,216,0.22)",
+                }}
+              >
+                <svg className="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </div>
+              <div>
+                <p
+                  className="text-[10px] font-bold uppercase tracking-[0.12em]"
+                  style={{ color: "var(--dash-teal-strong)" }}
+                >
+                  AI Copilot
+                </p>
+                <h2
+                  className="text-lg sm:text-xl font-bold"
+                  style={{ color: "var(--ui-heading)" }}
+                >
+                  Proactive Productivity Insights
+                </h2>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => generateAiInsights(true)}
+              disabled={aiInsightsLoading || aiInsightsTyping}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-200 self-start sm:self-auto"
+              style={{
+                background: !aiInsightsLoading && !aiInsightsTyping
+                  ? "linear-gradient(135deg,#6EE7D8,#14B8A6)"
+                  : "rgba(255,255,255,0.06)",
+                color: !aiInsightsLoading && !aiInsightsTyping ? "#111827" : "var(--ui-subtle)",
+                boxShadow: !aiInsightsLoading && !aiInsightsTyping
+                  ? "0 4px 12px rgba(110,231,216,0.22)"
+                  : "none",
+                cursor: !aiInsightsLoading && !aiInsightsTyping ? "pointer" : "not-allowed",
+              }}
+            >
+              {aiInsightsLoading ? (
+                <>
+                  <span className="w-3 h-3 border-2 border-teal-800 border-t-transparent rounded-full animate-spin" />
+                  Thinking...
+                </>
+              ) : aiInsightsTyping ? (
+                "Typing..."
+              ) : (
+                "Refresh Analysis"
+              )}
+            </button>
+          </div>
+
+          {aiInsightsLoading && !generatedInsights && (
+            <div className="space-y-2.5 p-4 rounded-xl animate-pulse" style={{ background: "rgba(110,231,216,0.04)" }}>
+              <div className="h-4 w-32 rounded bg-teal-500/10 animate-pulse" />
+              <div className="h-3.5 w-full rounded bg-teal-500/5 animate-pulse" />
+              <div className="h-3.5 w-5/6 rounded bg-teal-500/5 animate-pulse" />
+              <div className="h-3.5 w-4/5 rounded bg-teal-500/5 animate-pulse" />
+            </div>
+          )}
+
+          {aiInsightsError && (
+            <div
+              className="rounded-xl p-3.5 text-sm"
+              style={{
+                background: "rgba(248,113,113,0.08)",
+                border: "1px solid rgba(248,113,113,0.18)",
+                color: "var(--dash-danger)",
+              }}
+            >
+              {aiInsightsError}
+            </div>
+          )}
+
+          {generatedInsights && (
+            <div
+              className="rounded-xl p-4.5 transition-all duration-300"
+              style={{
+                background: "rgba(110,231,216,0.04)",
+                border: "1px solid rgba(110,231,216,0.11)",
+              }}
+            >
+              <div className="text-sm whitespace-pre-wrap leading-relaxed text-slate-800 dark:text-slate-100 font-normal">
+                {generatedInsights}
+                {aiInsightsTyping && (
+                  <span className="inline-block w-1.5 h-3.5 ml-1 bg-teal-400 animate-pulse align-middle" />
+                )}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       <div className="grid lg:grid-cols-5 gap-5">
         <div
