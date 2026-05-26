@@ -207,64 +207,95 @@ export default function DashboardLayout({
         }}
       >
         <div
-          className="flex items-center justify-end px-3 py-3 flex-shrink-0"
-          style={{ borderBottom: "1px solid var(--ui-border)", minHeight: "52px" }}
+          className={`flex items-center ${!collapsed ? "justify-between" : "justify-center"} px-3 py-3 flex-shrink-0`}
+          style={{ borderBottom: "1px solid var(--ui-border)", minHeight: "52px", position: "relative" }}
         >
           {!collapsed ? (
-            <button
-              onClick={() => setCollapsed(true)}
-              className="p-1.5 rounded-lg transition-all duration-150"
-              style={{ color: "var(--ui-muted)" }}
-              aria-label="Collapse sidebar"
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "#14b8a6";
-                (e.currentTarget as HTMLElement).style.background = "#f5f7f4";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "var(--ui-muted)";
-                (e.currentTarget as HTMLElement).style.background =
-                  "transparent";
-              }}
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+            <>
+              <Link href="/" className="flex items-center gap-2 px-1 flex-shrink-0">
+                <img
+                  src="/images/logo.png"
+                  alt="EduFlow AI"
+                  style={{
+                    height: "28px",
+                    width: "auto",
+                    display: "block",
+                  }}
                 />
-              </svg>
-            </button>
+              </Link>
+              <button
+                onClick={() => setCollapsed(true)}
+                className="p-1.5 rounded-lg transition-all duration-150"
+                style={{ color: "var(--ui-muted)" }}
+                aria-label="Collapse sidebar"
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.color = "#14b8a6";
+                  (e.currentTarget as HTMLElement).style.background = "#f5f7f4";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.color = "var(--ui-muted)";
+                  (e.currentTarget as HTMLElement).style.background =
+                    "transparent";
+                }}
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                  />
+                </svg>
+              </button>
+            </>
           ) : (
-            <button
-              onClick={() => setCollapsed(false)}
-              className="absolute -right-3 top-3 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-150"
-              style={{
-                background: "var(--ui-surface)",
-                border: "1px solid var(--ui-border)",
-                color: "#14b8a6",
-              }}
-              aria-label="Expand sidebar"
-            >
-              <svg
-                className="w-3 h-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <>
+              <div className="w-full flex justify-center py-0.5">
+                <Link href="/">
+                  <img
+                    src="/images/logo.png"
+                    alt="EduFlow AI"
+                    style={{
+                      height: "20px",
+                      width: "auto",
+                      display: "block",
+                      maxWidth: "40px",
+                      objectFit: "contain",
+                    }}
+                  />
+                </Link>
+              </div>
+              <button
+                onClick={() => setCollapsed(false)}
+                className="absolute -right-3 top-3 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-150"
+                style={{
+                  background: "var(--ui-surface)",
+                  border: "1px solid var(--ui-border)",
+                  color: "#14b8a6",
+                  zIndex: 10,
+                }}
+                aria-label="Expand sidebar"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2.5}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
+                <svg
+                  className="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+            </>
           )}
         </div>
 
