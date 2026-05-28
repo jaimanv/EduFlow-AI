@@ -5,7 +5,7 @@ import Features from "@/components/sections/features";
 
 export const metadata: Metadata = {
   title: 'EduFlow AI — Your AI-Powered Student Assistant',
-  details:
+  description:
     'Plan smarter, solve doubts instantly, generate clean notes, and track daily productivity — all in one beautifully simple workspace.',
 };
 
