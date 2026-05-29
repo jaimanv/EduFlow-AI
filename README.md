@@ -253,8 +253,6 @@ Thanks to the tools and platforms that make this project possible:
 
 ##  Contact
 
-Created by **Your Name**
-
 - GitHub: https://github.com/prabhakarshukla
 - LinkedIn: www.linkedin.com/in/prabhakar-shukla-90334b399
 - Instagram: https://www.instagram.com/prabhakar_.shukla
