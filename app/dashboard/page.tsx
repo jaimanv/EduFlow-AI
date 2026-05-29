@@ -26,7 +26,7 @@ type QuickAction = {
 type DbTask = {
   id: string;
   title: string | null;
-  label: string | null;
+  details: string | null;
   status: "done" | "in_progress" | "todo" | string;
   created_at?: string | null;
 };
@@ -441,6 +441,8 @@ export default function DashboardPage() {
         setWeeklyProgress(buildWeeklyProgressDays());
         setWeeklyProgressError(null);
 
+        const userId = u.user.id;
+
         const [
           allTasksRes,
           doneTasksRes,
@@ -454,40 +456,49 @@ export default function DashboardPage() {
         ] = await Promise.all([
           supabase
             .from("study_tasks")
-            .select("id,title,label,status,created_at")
+            .select("id,title,details,status,created_at")
+            .eq("user_id", userId)
             .order("created_at", { ascending: false })
             .limit(4),
           supabase
             .from("study_tasks")
             .select("id", { count: "exact", head: true })
+            .eq("user_id", userId)
             .eq("status", "done"),
           supabase
             .from("study_tasks")
-            .select("id", { count: "exact", head: true }),
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", userId),
           supabase
             .from("study_tasks")
             .select("id,created_at,updated_at")
+            .eq("user_id", userId)
             .eq("status", "done")
             .order("created_at", { ascending: false })
             .limit(500),
-          supabase.from("notes").select("id", { count: "exact", head: true }),
+          supabase
+            .from("notes")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", userId),
           supabase
             .from("notes")
             .select("id,title,updated_at,created_at")
+            .eq("user_id", userId)
             .order("updated_at", { ascending: false })
             .limit(1)
             .maybeSingle(),
           supabase
             .from("mood_entries")
             .select("id,mood,note,occurred_at")
+            .eq("user_id", userId)
             .order("occurred_at", { ascending: false })
             .limit(1)
             .maybeSingle(),
           supabase
             .from("productivity_sessions")
             .select("duration_minutes,session_date")
-            .eq("user_id", u.user.id),
-          getStreak(supabase, u.user.id),
+            .eq("user_id", userId),
+          getStreak(supabase, userId),
         ]);
 
         if (!alive) return;
@@ -495,14 +506,20 @@ export default function DashboardPage() {
 
         if (!alive) return;
 
-        if (allTasksRes.error) throw new Error(allTasksRes.error.message);
-        if (doneTasksRes.error) throw new Error(doneTasksRes.error.message);
-        if (totalTasksCountRes.error)
-          throw new Error(totalTasksCountRes.error.message);
+        if (allTasksRes.error) {
+          console.warn("[dashboard] Failed to load recent tasks:", allTasksRes.error.message);
+        }
+        if (doneTasksRes.error) {
+          console.warn("[dashboard] Failed to load completed task count:", doneTasksRes.error.message);
+        }
+        if (totalTasksCountRes.error) {
+          console.warn("[dashboard] Failed to load total task count:", totalTasksCountRes.error.message);
+        }
         if (weeklyTasksRes.error) {
           const fallbackWeeklyTasksRes = await supabase
             .from("study_tasks")
             .select("id,created_at")
+            .eq("user_id", userId)
             .eq("status", "done")
             .order("created_at", { ascending: false })
             .limit(500);
@@ -523,11 +540,18 @@ export default function DashboardPage() {
             ),
           );
         }
-        if (notesCountRes.error) throw new Error(notesCountRes.error.message);
-        if (latestNoteRes.error) throw new Error(latestNoteRes.error.message);
-        if (latestMoodRes.error) throw new Error(latestMoodRes.error.message);
-        if (productivityRes.error)
-          throw new Error(productivityRes.error.message);
+        if (notesCountRes.error) {
+          console.warn("[dashboard] Failed to load notes count:", notesCountRes.error.message);
+        }
+        if (latestNoteRes.error) {
+          console.warn("[dashboard] Failed to load latest note:", latestNoteRes.error.message);
+        }
+        if (latestMoodRes.error) {
+          console.warn("[dashboard] Failed to load latest mood:", latestMoodRes.error.message);
+        }
+        if (productivityRes.error) {
+          console.warn("[dashboard] Failed to load productivity sessions:", productivityRes.error.message);
+        }
 
         const tasks = (allTasksRes.data ?? []) as DbTask[];
         const totalFromList = tasks.length;
@@ -541,7 +565,7 @@ export default function DashboardPage() {
         setTaskPending(pending);
 
         const mappedFocus: FocusItem[] = tasks.map((t) => ({
-          label: String(t.title ?? t.label ?? "Untitled task"),
+          label: String(t.title ?? t.details ?? "Untitled task"),
           done: t.status === "done",
           priority: "medium",
         }));
