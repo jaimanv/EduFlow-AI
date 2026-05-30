@@ -66,8 +66,8 @@ const THEME_COLORS: Record<ColorTheme, { border: string; bg: string; text: strin
   },
 };
 
-const HOUR_START = 8; // 8:00 AM
-const HOUR_END = 21;   // 9:00 PM
+const HOUR_START = 1; // 1:00 AM
+const HOUR_END = 24;   // 12:00 AM
 const TOTAL_MINUTES = (HOUR_END - HOUR_START) * 60;
 
 function toMinutes(timeStr: string): number {
