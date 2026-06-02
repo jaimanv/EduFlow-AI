@@ -419,6 +419,7 @@ export default function DashboardPage() {
   const [generatedInsights, setGeneratedInsights] = useState<string | null>(
     null,
   );
+  const [todaySlots, setTodaySlots] = useState<any[]>([]);
 
   useEffect(() => {
     let alive = true;
@@ -589,6 +590,53 @@ export default function DashboardPage() {
         setProductivitySessions(productivity.length);
         setProductivityTotalMinutes(totalMinutes);
         setProductivityTodayMinutes(todayMinutes);
+
+        // Load today's schedule slots separately to handle fallback gracefully
+        const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const todayDayName = weekdays[new Date().getDay()];
+        let todaySlotsData: any[] = [];
+        try {
+          const { data: slotsRes, error: slotsErr } = await supabase
+            .from("timetable_slots")
+            .select("*")
+            .eq("day", todayDayName)
+            .order("start_time", { ascending: true });
+
+          if (slotsErr) {
+            const isTableMissing =
+              slotsErr.code === "42P01" ||
+              slotsErr.code === "PGRST204" ||
+              slotsErr.message?.toLowerCase().includes("schema cache") ||
+              slotsErr.message?.toLowerCase().includes("does not exist");
+
+            if (isTableMissing) {
+              const localData = localStorage.getItem(`timetable_slots_${u.user.id}`);
+              if (localData) {
+                const parsed = JSON.parse(localData);
+                todaySlotsData = parsed.filter((s: any) => s.day === todayDayName);
+              }
+            } else {
+              console.error("Supabase timetable error:", slotsErr.message);
+            }
+          } else {
+            todaySlotsData = slotsRes || [];
+          }
+        } catch (err) {
+          console.error("Error loading timetable slots:", err);
+          const localData = localStorage.getItem(`timetable_slots_${u.user.id}`);
+          if (localData) {
+            const parsed = JSON.parse(localData);
+            todaySlotsData = parsed.filter((s: any) => s.day === todayDayName);
+          }
+        }
+        todaySlotsData.sort((a, b) => {
+          const [ah, am] = a.start_time.split(":").map(Number);
+          const [bh, bm] = b.start_time.split(":").map(Number);
+          return (ah * 60 + am) - (bh * 60 + bm);
+        });
+        if (alive) {
+          setTodaySlots(todaySlotsData);
+        }
       } catch (e) {
         if (!alive) return;
         setError(
@@ -1791,6 +1839,99 @@ export default function DashboardPage() {
                   </div>
                 </Link>
               ))}
+            </div>
+          </div>
+
+          {/* Today's Schedule Card */}
+          <div
+            className="rounded-2xl p-5"
+            style={{
+              background: "var(--ui-surface)",
+              border: "1px solid var(--ui-border)",
+              boxShadow:
+                "0 1px 3px rgba(0,0,0,0.22), 0 4px 12px rgba(0,0,0,0.14)",
+            }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2
+                className="text-sm font-semibold"
+                style={{ color: "var(--ui-heading)", letterSpacing: "-0.01em" }}
+              >
+                Today&apos;s Schedule
+              </h2>
+              <Link
+                href="/dashboard/timetable"
+                className="text-xs transition-colors font-medium"
+                style={{ color: "#6EE7D8" }}
+              >
+                Open Timetable →
+              </Link>
+            </div>
+
+            <div className="space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
+              {loading ? (
+                <div className="text-xs text-[var(--ui-muted)]">Loading schedule...</div>
+              ) : todaySlots.length === 0 ? (
+                <div className="text-xs text-[var(--ui-muted)] py-4 text-center border border-dashed border-[var(--ui-border)] rounded-xl">
+                  No classes scheduled for today.
+                </div>
+              ) : (
+                todaySlots.map((slot, idx) => {
+                  const colors = {
+                    teal: { bg: "rgba(110,231,216,0.06)", border: "rgba(110,231,216,0.18)", text: "#6EE7D8", dot: "#14B8A6" },
+                    purple: { bg: "rgba(139,92,246,0.06)", border: "rgba(139,92,246,0.18)", text: "#a78bfa", dot: "#8b5cf6" },
+                    indigo: { bg: "rgba(99,102,241,0.06)", border: "rgba(99,102,241,0.18)", text: "#818cf8", dot: "#6366f1" },
+                    amber: { bg: "rgba(245,158,11,0.06)", border: "rgba(245,158,11,0.18)", text: "#fbbf24", dot: "#f59e0b" },
+                    rose: { bg: "rgba(244,63,94,0.06)", border: "rgba(244,63,94,0.18)", text: "#fb7185", dot: "#f43f5e" },
+                    emerald: { bg: "rgba(16,185,129,0.06)", border: "rgba(16,185,129,0.18)", text: "#34d399", dot: "#10b981" },
+                  };
+                  const theme = colors[slot.color as "teal"] || colors.teal;
+                  const hStrStart = slot.start_time;
+                  const [hStart, mStart] = hStrStart.split(":").map(Number);
+                  const ampmStart = hStart >= 12 ? "PM" : "AM";
+                  const displayHourStart = hStart % 12 || 12;
+                  const formattedTime = `${displayHourStart}:${String(mStart).padStart(2, "0")} ${ampmStart}`;
+
+                  return (
+                    <div
+                      key={slot.id || idx}
+                      className="flex items-center justify-between p-3 rounded-xl border transition-all"
+                      style={{
+                        background: "rgba(255,255,255,0.01)",
+                        borderColor: "var(--ui-border)",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = theme.border;
+                        e.currentTarget.style.background = theme.bg;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = "var(--ui-border)";
+                        e.currentTarget.style.background = "rgba(255,255,255,0.01)";
+                      }}
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: theme.dot }} />
+                          <p className="text-xs font-bold text-[var(--ui-heading)] truncate">{slot.subject}</p>
+                        </div>
+                        <p className="text-[10px] text-[var(--ui-muted)] mt-0.5 ml-3.5">
+                          ⏰ {formattedTime} {slot.location ? `• 📍 ${slot.location}` : ""}
+                        </p>
+                      </div>
+                      <span
+                        className="text-[9px] font-semibold px-2 py-0.5 rounded-full uppercase"
+                        style={{
+                          background: theme.bg,
+                          color: theme.text,
+                          border: `1px solid ${theme.border}`,
+                        }}
+                      >
+                        {slot.color}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
 

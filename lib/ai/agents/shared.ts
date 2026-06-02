@@ -1,4 +1,4 @@
-export type AgentType = "planner" | "tutor" | "notes" | "productivity" | "mood";
+export type AgentType = "planner" | "tutor" | "notes" | "productivity" | "mood" | "timetable";
 
 export type AgentContext = string | Record<string, unknown> | null | undefined;
 
@@ -31,11 +31,19 @@ type GeminiResponse = {
   };
 };
 
-const DEFAULT_MODEL = process.env.OPENAI_MODEL || "openrouter/free";
+const isRealOpenAiKey =
+  process.env.OPENAI_API_KEY?.startsWith("sk-proj-") ||
+  (process.env.OPENAI_API_KEY?.startsWith("sk-") && !process.env.OPENAI_API_KEY?.startsWith("sk-or-"));
+
+const DEFAULT_MODEL =
+  process.env.OPENAI_MODEL ||
+  (isRealOpenAiKey ? "gpt-4o-mini" : "openrouter/free");
+
 const DEFAULT_BASE_URL =
   process.env.OPENAI_BASE_URL ||
-  process.env.OPENROUTER_BASE_URL ||
-  "https://openrouter.ai/api/v1";
+  (isRealOpenAiKey
+    ? "https://api.openai.com/v1"
+    : process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1");
 const DEFAULT_REFERER =
   process.env.OPENAI_HTTP_REFERER || "http://localhost:3000";
 const DEFAULT_TITLE = process.env.OPENAI_APP_TITLE || "EduFlow AI";
@@ -188,7 +196,7 @@ async function runGeminiCompletion({
     ],
     generationConfig: {
       temperature,
-      maxOutputTokens: maxTokens,
+      maxOutputTokens: Math.max(maxTokens, 8192),
     },
   });
 
