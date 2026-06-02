@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../../lib/supabase";
+import FloatingTaskChecklist from "../../components/FloatingTaskChecklist";
 
 const sidebarLinks = [
   {
@@ -446,6 +447,8 @@ export default function DashboardLayout({
           )}
         </div>
       </aside>
+
+      <FloatingTaskChecklist />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <header
