@@ -17,6 +17,10 @@
   --ui-active-bg:    #ecfdf8;
   --ui-shadow-card:  0 1px 3px rgba(0, 0, 0, 0.05);
 
+  --ui-navbar-bg:     rgba(255, 255, 255, 0.85);
+  --ui-navbar-border: rgba(229, 231, 235, 0.6);
+  --ui-navbar-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 8px -1px rgba(0, 0, 0, 0.03);
+
   --primary:        #6EE7D8;
   --secondary:      #14B8A6;
   --accent:         #5EEAD4;
@@ -48,6 +52,10 @@ html.dark {
   --ui-hover:        #1e293b;
   --ui-active-bg:    rgba(20, 184, 166, 0.16);
   --ui-shadow-card:  0 1px 3px rgba(0, 0, 0, 0.35);
+
+  --ui-navbar-bg:     rgba(17, 24, 39, 0.85);
+  --ui-navbar-border: rgba(51, 65, 85, 0.6);
+  --ui-navbar-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35), 0 2px 8px -1px rgba(0, 0, 0, 0.2);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

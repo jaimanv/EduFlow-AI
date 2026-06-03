@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
+
 export default function AboutPage() {
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4 pt-20"
+      className="min-h-screen flex items-center justify-center px-4 pt-24 pb-12"
       style={{ background: "#fcfcf9" }}
     >
       <div className="max-w-2xl w-full">
@@ -97,28 +99,12 @@ export default function AboutPage() {
             </div>
 
             <div className="pt-6">
-              <a
+              <Link
                 href="/"
-                className="inline-block px-6 py-3 text-sm font-semibold rounded-lg transition-all duration-200"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #14b8a6 0%, #6ee7d8 100%)",
-                  color: "#ffffff",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.transform =
-                    "translateY(-2px)";
-                  (e.currentTarget as HTMLElement).style.boxShadow =
-                    "0 10px 22px rgba(20,184,166,0.32)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.transform =
-                    "translateY(0)";
-                  (e.currentTarget as HTMLElement).style.boxShadow = "none";
-                }}
+                className="inline-block px-6 py-3 text-sm font-semibold rounded-lg bg-gradient-to-r from-[#14b8a6] to-[#6ee7d8] text-white shadow-[0_4px_12px_rgba(20,184,166,0.22)] hover:shadow-[0_10px_22px_rgba(20,184,166,0.32)] hover:-translate-y-0.5 transition-all duration-200"
               >
                 Back to Home
-              </a>
+              </Link>
             </div>
           </div>
         </div>
