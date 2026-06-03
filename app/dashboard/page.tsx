@@ -4,6 +4,8 @@ import Link from "next/link";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { formatLastActiveDate, getStreak, type Streak } from "@/lib/streaks";
+import { useRecommendations } from "@/hooks/useRecommendations";
+import RecommendationCard from "@/components/RecommendationCard";
 
 type OverviewCard = {
   title: string;
@@ -380,6 +382,22 @@ const resolveDisplayName = (
 
   return fullName || name || emailPrefix || "Student";
 };
+
+const RecommendationsSection = memo(function RecommendationsSection() {
+  const { recommendations, loading, error, generatedAt, rawInsight, refresh } =
+    useRecommendations();
+
+  return (
+    <RecommendationCard
+      recommendations={recommendations}
+      loading={loading}
+      error={error}
+      generatedAt={generatedAt}
+      rawInsight={rawInsight}
+      onRefresh={refresh}
+    />
+  );
+});
 
 export default function DashboardPage() {
   const now = useMemo(() => new Date(), []);
@@ -1614,6 +1632,9 @@ export default function DashboardPage() {
           )}
         </section>
       )}
+
+      {/* AI Recommendations Card */}
+      {!loading && <RecommendationsSection />}
 
       <div className="grid lg:grid-cols-5 gap-5">
         <div

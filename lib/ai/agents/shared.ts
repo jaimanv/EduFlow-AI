@@ -1,4 +1,4 @@
-export type AgentType = "planner" | "tutor" | "notes" | "productivity" | "mood" | "timetable";
+export type AgentType = "planner" | "tutor" | "notes" | "productivity" | "mood" | "timetable" | "recommendation";
 
 export type AgentContext = string | Record<string, unknown> | null | undefined;
 
