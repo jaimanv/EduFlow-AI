@@ -83,7 +83,8 @@ export default function Navbar() {
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-[60px] gap-6">
+        {/* <div className="flex items-center justify-between h-[60px] gap-6"> */}
+        <div className="grid grid-cols-3 items-center h-[60px]">
           <Link
             href="/"
             className="flex items-center flex-shrink-0 transition-all duration-200 hover:scale-[1.04]"
@@ -109,15 +110,14 @@ export default function Navbar() {
                 <Link
                   key={label}
                   href={href}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 whitespace-nowrap ${
-                    isDarkNavbar
-                      ? active
-                        ? "text-teal-400 bg-teal-400/10"
-                        : "text-slate-300 hover:text-teal-400 hover:bg-teal-400/10"
-                      : active
-                        ? "text-teal-600 bg-teal-500/10"
-                        : "text-slate-700 hover:text-teal-600 hover:bg-teal-500/10"
-                  }`}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 whitespace-nowrap ${isDarkNavbar
+                    ? active
+                      ? "text-teal-400 bg-teal-400/10"
+                      : "text-slate-300 hover:text-teal-400 hover:bg-teal-400/10"
+                    : active
+                      ? "text-teal-600 bg-teal-500/10"
+                      : "text-slate-700 hover:text-teal-600 hover:bg-teal-500/10"
+                    }`}
                 >
                   {label}
                 </Link>
@@ -125,17 +125,18 @@ export default function Navbar() {
             })}
           </nav>
 
-          <div className="hidden md:flex items-center gap-2.5 flex-shrink-0">
+          {/* <div className="hidden md:flex items-center gap-2.5 flex-shrink-0"> */}
+          <div className="hidden px-9 py-2 md:flex items-center gap-3 flex-shrink-0">
+
             {authReady && user ? (
               <>
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-150 whitespace-nowrap ${
-                    isDarkNavbar
-                      ? "border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700"
-                      : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                  }`}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-150 whitespace-nowrap ${isDarkNavbar
+                    ? "border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700"
+                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                    }`}
                 >
                   Log out
                 </button>
@@ -144,11 +145,10 @@ export default function Navbar() {
               <>
                 <Link
                   href="/auth/login"
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 whitespace-nowrap ${
-                    isDarkNavbar
-                      ? "text-slate-400 hover:text-teal-400 hover:bg-slate-800"
-                      : "text-slate-500 hover:text-teal-600 hover:bg-slate-50"
-                  }`}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 whitespace-nowrap ${isDarkNavbar
+                    ? "text-slate-400 hover:text-teal-400 hover:bg-slate-800"
+                    : "text-slate-500 hover:text-teal-600 hover:bg-slate-50"
+                    }`}
                 >
                   Log in
                 </Link>
@@ -226,15 +226,14 @@ export default function Navbar() {
                     key={label}
                     href={href}
                     onClick={() => setMobileOpen(false)}
-                    className={`px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-150 ${
-                      isDarkNavbar
-                        ? active
-                          ? "text-teal-400 bg-teal-400/10"
-                          : "text-slate-300 hover:text-teal-400 hover:bg-teal-400/10"
-                        : active
-                          ? "text-teal-600 bg-teal-500/10"
-                          : "text-slate-700 hover:text-teal-600 hover:bg-teal-500/10"
-                    }`}
+                    className={`px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-150 ${isDarkNavbar
+                      ? active
+                        ? "text-teal-400 bg-teal-400/10"
+                        : "text-slate-300 hover:text-teal-400 hover:bg-teal-400/10"
+                      : active
+                        ? "text-teal-600 bg-teal-500/10"
+                        : "text-slate-700 hover:text-teal-600 hover:bg-teal-500/10"
+                      }`}
                   >
                     {label}
                   </Link>
@@ -256,11 +255,10 @@ export default function Navbar() {
                 <>
                   <Link
                     href="/auth/login"
-                    className={`px-4 py-2.5 text-center text-sm font-medium rounded-xl border transition-colors ${
-                      isDarkNavbar
-                        ? "border-slate-700 text-slate-400 hover:text-slate-200 hover:bg-slate-800"
-                        : "border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-                    }`}
+                    className={`px-4 py-2.5 text-center text-sm font-medium rounded-xl border transition-colors ${isDarkNavbar
+                      ? "border-slate-700 text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+                      : "border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+                      }`}
                   >
                     Log in
                   </Link>

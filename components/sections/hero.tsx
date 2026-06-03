@@ -58,7 +58,8 @@ export default function Hero() {
       </div>
 
       <div className="relative mx-auto flex min-h-[min(100vh,980px)] w-full max-w-7xl items-center px-5 py-20 sm:px-8 sm:py-24 lg:px-8">
-        <div className="relative z-10 max-w-2xl rounded-[32px] border border-white/40 bg-white/55 p-6 shadow-[0_20px_70px_rgba(15,23,42,0.08)] backdrop-blur-[10px] sm:p-8 lg:max-w-[46%] lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-0">
+        {/* <div className="relative z-10 max-w-2xl rounded-[32px] border border-white/40 bg-white/55 p-6 shadow-[0_20px_70px_rgba(15,23,42,0.08)] backdrop-blur-[10px] sm:p-8 lg:max-w-[46%] lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-0"> */}
+        <div className="relative z-10 max-w-2xl rounded-[32px] border border-white/20 bg-black/20 backdrop-blur-xl p-6 shadow-[0_20px_70px_rgba(15,23,42,0.25)] sm:p-8 lg:max-w-[46%]">
           <div
             className="mb-5 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold"
             style={{ background: 'var(--ui-surface-2)', border: '1px solid var(--ui-border)', color: '#14b8a6' }}
@@ -78,7 +79,7 @@ export default function Hero() {
 
           <p
             className="mb-8 max-w-lg leading-relaxed"
-            style={{ fontSize: 'clamp(1rem, 1.8vw, 1.12rem)', color: 'var(--ui-muted)' }}
+            style={{ fontSize: 'clamp(1rem, 1.8vw, 1.12rem)', color: 'var(--ui-subtle)' }}
           >
             EduFlow AI brings your planning, doubt solving, notes, and productivity habits
             into one beautifully organized space built for modern students.
@@ -105,7 +106,7 @@ export default function Hero() {
             </Link>
           </div>
 
-          <p className="text-sm" style={{ color: 'var(--ui-muted)' }}>
+          <p className="text-sm" style={{ color: 'var(--ui-subtle)' }}>
             Trusted by students who want consistent, focused progress.
           </p>
 
