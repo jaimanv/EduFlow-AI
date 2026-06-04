@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -17,6 +17,7 @@ type SharedNote = {
 };
 
 function PrivacyPageContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const noteId = searchParams.get("id");
   const [note, setNote] = useState<SharedNote | null>(null);
@@ -206,34 +207,58 @@ function PrivacyPageContent() {
         backgroundColor: "#fcfcf9",
         color: "#1f2937",
         minHeight: "100vh",
-        padding: "2rem 1rem",
+        padding: "5rem 1rem 2rem",
       }}
     >
       <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-        <Link
-          href="/"
-          style={{
-            color: "#14b8a6",
-            textDecoration: "none",
-            fontSize: "0.875rem",
-            marginBottom: "2rem",
-            display: "inline-block",
-          }}
-        >
-          ← Back to Home
-        </Link>
-
-        <h1
-          style={{
-            fontSize: "2.25rem",
-            fontWeight: 800,
-            marginBottom: "0.5rem",
-            marginTop: "2rem",
-            color: "#1f2937",
-          }}
-        >
-          Privacy Policy
-        </h1>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+          <h1
+            style={{
+              fontSize: "2.25rem",
+              fontWeight: 800,
+              marginBottom: 0,
+              marginTop: 0,
+              color: "#1f2937",
+            }}
+          >
+            Privacy Policy
+          </h1>
+          <button
+            onClick={() => {
+              if (window.history.length > 1) {
+                router.back();
+              } else {
+                router.push("/");
+              }
+            }}
+            aria-label="Go back to previous page"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.375rem",
+              cursor: "pointer",
+              color: "#14b8a6",
+              backgroundColor: "transparent",
+              border: "1px solid #14b8a6",
+              borderRadius: "0.375rem",
+              fontSize: "0.875rem",
+              fontWeight: 500,
+              padding: "0.375rem 0.875rem",
+              flexShrink: 0,
+              transition: "background-color 0.15s, color 0.15s",
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#14b8a6";
+              (e.currentTarget as HTMLButtonElement).style.color = "#ffffff";
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
+              (e.currentTarget as HTMLButtonElement).style.color = "#14b8a6";
+            }}
+          >
+            ← Back
+          </button>
+        </div>
         <p style={{ color: "#6b7280", marginBottom: "1rem" }}>
           <strong>Last Updated:</strong> April 2026
         </p>
