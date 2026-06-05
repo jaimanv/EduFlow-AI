@@ -111,6 +111,10 @@ The project includes a multi-agent AI approach, allowing different AI workflows 
 ![Notes Screenshot](./public/images/notes.png)
 
 ---
+## discord channel 
+https://discord.gg/NbbqfpdPeK
+
+---
 
 ## ⚙️ Setup Instructions
 
