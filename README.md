@@ -133,18 +133,24 @@ npm install
 
 ### 3. Create environment file
 
-Create a `.env.local` file in the root directory:
+Create a `.env` & `env.local` file in the root directory:
 
 ```bash
+.env{
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+}
+env.local{
 AI_PROVIDER=gemini
 GEMINI_API_KEY=
-GEMINI_MODEL=gemini-2.5-flash
-OPENAI_API_KEY=
+GEMINI_MODEL=gemini-2.5-flash-lite
+RESEND_API_KEY=
+CONTACT_TO_EMAIL=
+RESEND_FROM_EMAIL=
+}
 ```
 
-Add your Supabase project URL, Supabase anon key, and AI API key. EduFlow AI uses Gemini when `AI_PROVIDER=gemini`, and can fall back to the OpenRouter/OpenAI-compatible key when `OPENAI_API_KEY` is available.
+Add your Supabase project URL, Supabase anon key, and AI API key. EduFlow AI uses Gemini when `AI_PROVIDER=gemini`, and can fall back to the OpenRouter/OpenAI-compatible key 
 
 ### 4. Run the development server
 
@@ -168,15 +174,20 @@ npm run build
 
 ## Environment Variables
 
-Example `.env.local`:
+Example `.env` & `.env.local`:
 
-```env
+```.env
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+```
+``` env.local
 AI_PROVIDER=gemini
 GEMINI_API_KEY=
-GEMINI_MODEL=gemini-2.5-flash
-OPENAI_API_KEY=
+GEMINI_MODEL=gemini-2.5-flash-lite
+RESEND_API_KEY=
+CONTACT_TO_EMAIL=
+RESEND_FROM_EMAIL=
+
 ```
 
 ##  Key Features Highlight
