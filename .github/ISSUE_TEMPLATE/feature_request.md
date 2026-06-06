@@ -1,7 +1,7 @@
 ---
 name: Feature Request
 about: Suggest a new feature or enhancement for LecturePulse
-title: "[Feature] "
+title: "[FEATURE] "
 ---
 
 ## Problem Statement

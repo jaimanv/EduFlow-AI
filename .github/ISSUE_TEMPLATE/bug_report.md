@@ -1,7 +1,7 @@
 ---
 name: Bug Report
 about: Report a bug or broken behavior in LecturePulse
-title: "[Bug] "
+title: "[BUG] "
 ---
 
 ## Description

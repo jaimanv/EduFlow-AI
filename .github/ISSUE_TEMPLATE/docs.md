@@ -1,7 +1,7 @@
 ---
 name: Documentation
 about: Report missing, incorrect, or outdated documentation
-title: "[Docs] "
+title: "[DOCS] "
 ---
 
 ## What's Missing or Incorrect
