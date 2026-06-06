@@ -194,7 +194,7 @@ export default function DashboardLayout({
   return (
     <div
       className="flex min-h-screen"
-      style={{ background: "var(--ui-bg)", paddingTop: "64px" }}
+      style={{ background: "var(--ui-bg)" }}
     >
       {mobileOpen && (
         <div
@@ -210,8 +210,8 @@ export default function DashboardLayout({
           ${mobileOpen ? "left-0" : "-left-64 md:left-0"}
         `}
         style={{
-          top: "64px",
-          height: "calc(100vh - 64px)",
+          top: "0px",
+          height: "100vh",
           width: collapsed ? "64px" : "224px",
           background: "var(--ui-surface)",
           borderRight: "1px solid var(--ui-border)",

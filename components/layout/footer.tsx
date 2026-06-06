@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const cols = [
   {
@@ -28,6 +29,13 @@ const cols = [
 ];
 
 export default function Footer() {
+  const pathname = usePathname();
+  const isDashboardOrAuth = pathname?.startsWith('/dashboard') || pathname?.startsWith('/auth');
+
+  if (isDashboardOrAuth) {
+    return null;
+  }
+
   return (
     <footer
       className="bg-[#222022] dark:bg-[#020617]"

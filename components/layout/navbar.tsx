@@ -64,8 +64,13 @@ export default function Navbar() {
   };
 
   const isDashboardOrAuth = pathname?.startsWith("/dashboard") || pathname?.startsWith("/auth");
+
+  if (isDashboardOrAuth) {
+    return null;
+  }
+
   const isAboutPage = pathname === "/about";
-  const isDarkNavbar = isDashboardOrAuth || (pathname === "/" ? scrolled : !isAboutPage);
+  const isDarkNavbar = pathname === "/" ? scrolled : !isAboutPage;
 
   return (
     <header
