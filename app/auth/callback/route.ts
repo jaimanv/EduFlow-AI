@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { getSupabaseConfig } from "@/lib/supabase-config";
 
 function getSafeNextPath(value: string | null) {
@@ -47,18 +47,12 @@ export async function GET(request: NextRequest) {
 
   let response = NextResponse.redirect(redirectUrl);
   const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll();
-      },
-      setAll(cookiesToSet) {
-        for (const { name, value, options } of cookiesToSet) {
-          response.cookies.set(name, value, options);
-        }
-      },
-    },
-  });
+  const supabase = createSupabaseServerClient(
+  request,
+  response,
+  supabaseUrl,
+  supabaseAnonKey
+  );
 
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 

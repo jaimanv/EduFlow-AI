@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { getSupabaseConfig } from "./lib/supabase-config";
+import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { getSupabaseConfig } from "@/lib/supabase-config";
 
 function redirectTo(
   request: NextRequest,
@@ -58,18 +58,12 @@ export async function proxy(request: NextRequest) {
   }
 
   const { supabaseUrl, supabaseAnonKey } = getSupabaseConfig();
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll();
-      },
-      setAll(cookiesToSet) {
-        for (const { name, value, options } of cookiesToSet) {
-          response.cookies.set(name, value, options);
-        }
-      },
-    },
-  });
+  const supabase = createSupabaseServerClient(
+  request,
+  response,
+  supabaseUrl,
+  supabaseAnonKey
+  );
 
   const {
     data: { user },
