@@ -5,6 +5,7 @@ import jsPDF from "jspdf";
 import { supabase } from "../../../lib/supabase";
 import { FormattedNote } from "@/components/notes/formatted-note";
 import { parseNoteBlocks, stripInlineMarkdown } from "@/utils/noteFormatting";
+import { useFeatureStatus } from "@/hooks/useFeatureStatus";
 
 type NoteRow = {
   id: string;
@@ -203,6 +204,9 @@ const copyShareLink = async (noteId: string, notificationFn: (msg: string) => vo
 };
 
 export default function NotesPage() {
+  const { status: featureStatus, loading: featureLoading } = useFeatureStatus();
+  const isAiActive = featureStatus ? featureStatus.ai.active : true;
+
   const [notes, setNotes] = useState<NoteRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -984,6 +988,7 @@ export default function NotesPage() {
                 style={{
                   background: "rgba(110,231,216,0.04)",
                   border: "1px solid rgba(110,231,216,0.14)",
+                  opacity: isAiActive ? 1 : 0.65,
                 }}
               >
                 <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -1007,28 +1012,29 @@ export default function NotesPage() {
                       setAiTopic(e.target.value);
                       if (aiError) setAiError(null);
                     }}
-                    placeholder="Enter topic (e.g. Electromagnetic Induction)"
+                    placeholder={isAiActive ? "Enter topic (e.g. Electromagnetic Induction)" : "AI generation is disabled (missing key)"}
                     className="rounded-xl px-3 py-2.5 text-sm w-full"
                     style={{
                       background: "var(--ui-surface)",
-                      border: "1px solid rgba(110,231,216,0.15)",
-                      color: "var(--ui-heading)",
+                      border: isAiActive ? "1px solid rgba(110,231,216,0.15)" : "1px solid rgba(248,113,113,0.20)",
+                      color: isAiActive ? "var(--ui-heading)" : "var(--ui-muted)",
                       outline: "none",
+                      cursor: isAiActive ? "text" : "not-allowed",
                     }}
-                    disabled={!selectedId || aiLoading || aiTyping}
+                    disabled={!selectedId || aiLoading || aiTyping || !isAiActive}
                   />
                   <button
                     type="button"
                     onClick={generateWithAi}
-                    disabled={!selectedId || aiLoading || aiTyping || !aiTopic.trim()}
+                    disabled={!selectedId || aiLoading || aiTyping || !aiTopic.trim() || !isAiActive}
                     className="btn-primary justify-center text-xs px-4 py-2.5 whitespace-nowrap"
                     style={{
                       opacity:
-                        !selectedId || aiLoading || aiTyping || !aiTopic.trim()
-                          ? 0.7
+                        !selectedId || aiLoading || aiTyping || !aiTopic.trim() || !isAiActive
+                          ? 0.5
                           : 1,
                       cursor:
-                        !selectedId || aiLoading || aiTyping || !aiTopic.trim()
+                        !selectedId || aiLoading || aiTyping || !aiTopic.trim() || !isAiActive
                           ? "not-allowed"
                           : "pointer",
                     }}
@@ -1040,6 +1046,11 @@ export default function NotesPage() {
                         : "Generate with AI"}
                   </button>
                 </div>
+                {!featureLoading && !isAiActive && (
+                  <p className="text-xs text-amber-500 font-medium mt-1">
+                    ⚠️ Disabled (Missing <code className="font-mono text-[10px] px-1 rounded bg-amber-500/10">GEMINI_API_KEY</code> in environment variables)
+                  </p>
+                )}
                 {aiLoading && (
                   <div
                     className="rounded-xl p-3 space-y-2"

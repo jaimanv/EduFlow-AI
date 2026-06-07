@@ -170,25 +170,25 @@ Open the app in your browser:
 npm run build
 ```
 
----
-
 ## Environment Variables
 
-Example `.env` & `.env.local`:
+EduFlow AI separates its environment variables into core required variables (needed for the database and authentication) and optional variables (needed for AI features or email notifications). 
 
-```.env
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-```
-``` env.local
-AI_PROVIDER=gemini
-GEMINI_API_KEY=
-GEMINI_MODEL=gemini-2.5-flash-lite
-RESEND_API_KEY=
-CONTACT_TO_EMAIL=
-RESEND_FROM_EMAIL=
+| Variable | File | Status | Description | Default / Example |
+| --- | --- | --- | --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | `.env` | **Required** | The API endpoint URL for your Supabase project. Required for database connection and user authentication. | `https://your-project.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `.env` | **Required** | The anonymous client key for your Supabase project. Used for authenticating requests. | `eyJhbGciOiJIUzI1NiIsInR5c...` |
+| `AI_PROVIDER` | `.env.local` | *Optional* | The LLM provider to use for AI features. | `gemini` |
+| `GEMINI_API_KEY` | `.env.local` | *Optional* | API key for Google Gemini. Required for AI Doubt Solver, AI Notes Generator, and Study Room AI suggestions. If missing, AI features will be greyed out. | `AIzaSy...` |
+| `GEMINI_MODEL` | `.env.local` | *Optional* | The specific Gemini model identifier to use. | `gemini-2.5-flash-lite` |
+| `RESEND_API_KEY` | `.env.local` | *Optional* | API key for Resend email service. Required for sending contact form submissions. | `re_123456789...` |
+| `CONTACT_TO_EMAIL` | `.env.local` | *Optional* | Destination email address to receive contact form submissions. | `support@eduflow.ai` |
+| `RESEND_FROM_EMAIL` | `.env.local` | *Optional* | The verified sender email address in Resend for sending messages. | `onboarding@resend.dev` |
 
-```
+> [!NOTE]
+> Contributors who do not wish to work on AI or email features can skip setting `GEMINI_API_KEY` and `RESEND_API_KEY`. The core study planner, notes CRUD, productivity tracker, and timetable features will remain fully functional, and the inactive features will be gracefully disabled in the UI.
+
+---
 
 ##  Key Features Highlight
 

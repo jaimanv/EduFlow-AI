@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../../../lib/supabase";
+import { useFeatureStatus } from "@/hooks/useFeatureStatus";
 
 type SessionRow = {
   id: string;
@@ -68,6 +69,9 @@ type TaskStats = {
 };
 
 export default function ProductivityPage() {
+  const { status: featureStatus, loading: featureLoading } = useFeatureStatus();
+  const isAiActive = featureStatus ? featureStatus.ai.active : true;
+
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -297,6 +301,13 @@ export default function ProductivityPage() {
   };
 
   const generateAiInsights = async (force = false) => {
+    if (!isAiActive) {
+      setGeneratedInsights("Productivity Insights are currently disabled because the Gemini API key is missing. Set GEMINI_API_KEY in env.local to enable them.");
+      setAiInsightsLoading(false);
+      setAiInsightsTyping(false);
+      return;
+    }
+
     const dataStateKey = `${stats.totalSessions}-${stats.totalMinutes}-${taskStats.totalTasks}-${taskStats.completedTasks}`;
 
     if (!force) {
@@ -463,17 +474,18 @@ export default function ProductivityPage() {
           <button
             type="button"
             onClick={() => generateAiInsights(true)}
-            disabled={aiInsightsLoading || aiInsightsTyping}
+            disabled={aiInsightsLoading || aiInsightsTyping || !isAiActive}
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
             style={{
-              background: !aiInsightsLoading && !aiInsightsTyping
+              background: isAiActive && !aiInsightsLoading && !aiInsightsTyping
                 ? "linear-gradient(135deg,#6EE7D8,#14B8A6)"
                 : "rgba(255,255,255,0.06)",
-              color: !aiInsightsLoading && !aiInsightsTyping ? "#111827" : "var(--ui-subtle)",
-              boxShadow: !aiInsightsLoading && !aiInsightsTyping
+              color: isAiActive && !aiInsightsLoading && !aiInsightsTyping ? "#111827" : "var(--ui-subtle)",
+              boxShadow: isAiActive && !aiInsightsLoading && !aiInsightsTyping
                 ? "0 4px 16px rgba(110,231,216,0.28)"
                 : "none",
-              cursor: !aiInsightsLoading && !aiInsightsTyping ? "pointer" : "not-allowed",
+              cursor: isAiActive && !aiInsightsLoading && !aiInsightsTyping ? "pointer" : "not-allowed",
+              opacity: isAiActive ? 1 : 0.5,
             }}
           >
             {aiInsightsLoading

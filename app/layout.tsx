@@ -3,6 +3,11 @@ import "./globals.css";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/footer";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { checkEnvStatus } from "../lib/env-check";
+
+// Run feature activation check on server startup
+checkEnvStatus();
+
 
 export const metadata: Metadata = {
   title: "EduFlow AI — Your AI-Powered Student Assistant",

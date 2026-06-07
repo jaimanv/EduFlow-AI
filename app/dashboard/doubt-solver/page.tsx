@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { FormattedNote } from '@/components/notes/formatted-note';
+import { useFeatureStatus } from '@/hooks/useFeatureStatus';
 
 type SolverStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -18,6 +19,9 @@ const exampleQuestions = [
 ];
 
 export default function DoubtSolverPage() {
+  const { status: featureStatus, loading: featureLoading } = useFeatureStatus();
+  const isAiActive = featureStatus ? featureStatus.ai.active : true;
+
   const [question, setQuestion] = useState('');
   const [status, setStatus] = useState<SolverStatus>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +29,7 @@ export default function DoubtSolverPage() {
   const [displayedAnswer, setDisplayedAnswer] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
-  const canSubmit = useMemo(() => question.trim().length > 0 && status !== 'loading', [question, status]);
+  const canSubmit = useMemo(() => isAiActive && question.trim().length > 0 && status !== 'loading', [isAiActive, question, status]);
 
   const resetState = () => {
     setStatus('idle');
@@ -108,6 +112,27 @@ export default function DoubtSolverPage() {
         </p>
       </div>
 
+      {!featureLoading && !isAiActive && (
+        <div
+          className="flex items-start gap-3 rounded-xl p-4 text-sm mb-4"
+          style={{
+            background: 'rgba(245,158,11,0.08)',
+            border: '1px solid rgba(245,158,11,0.22)',
+            color: '#fbbf24',
+          }}
+        >
+          <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <div>
+            <h4 className="font-semibold text-amber-500">AI Features Inactive</h4>
+            <p className="text-xs mt-0.5 text-amber-500/80">
+              The AI Doubt Solver is disabled because the Gemini API key is missing. Set <code className="font-mono text-xs px-1 rounded bg-black/20">GEMINI_API_KEY</code> in your <code className="font-mono text-xs px-1 rounded bg-black/20">.env.local</code> file to enable this feature.
+            </p>
+          </div>
+        </div>
+      )}
+
       <form
         onSubmit={handleSubmit}
         className="rounded-2xl p-5 space-y-4"
@@ -123,23 +148,36 @@ export default function DoubtSolverPage() {
             setQuestion(e.target.value);
             if (status !== 'idle') resetState();
           }}
-          placeholder="e.g. Explain Kirchhoff's Voltage Law with a simple circuit example."
+          placeholder={isAiActive ? "e.g. Explain Kirchhoff's Voltage Law with a simple circuit example." : "AI Doubt Solver is disabled because GEMINI_API_KEY is not configured in the environment."}
           rows={5}
+          disabled={!isAiActive}
           className="w-full rounded-xl px-4 py-3 text-sm resize-y outline-none transition-all duration-200"
           style={{
             background: 'var(--ui-surface)',
-            border: '1px solid rgba(110,231,216,0.15)',
-            color: 'var(--ui-heading)',
+            border: isAiActive ? '1px solid rgba(110,231,216,0.15)' : '1px solid rgba(248,113,113,0.20)',
+            color: isAiActive ? 'var(--ui-heading)' : 'var(--ui-muted)',
             lineHeight: 1.7,
+            opacity: isAiActive ? 1 : 0.6,
+            cursor: isAiActive ? 'text' : 'not-allowed',
           }}
-          onFocus={e => { e.currentTarget.style.borderColor = 'rgba(110,231,216,0.40)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(110,231,216,0.07)'; }}
-          onBlur={e => { e.currentTarget.style.borderColor = 'rgba(110,231,216,0.15)'; e.currentTarget.style.boxShadow = 'none'; }}
+          onFocus={e => {
+            if (isAiActive) {
+              e.currentTarget.style.borderColor = 'rgba(110,231,216,0.40)';
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(110,231,216,0.07)';
+            }
+          }}
+          onBlur={e => {
+            if (isAiActive) {
+              e.currentTarget.style.borderColor = 'rgba(110,231,216,0.15)';
+              e.currentTarget.style.boxShadow = 'none';
+            }
+          }}
         />
 
         <div className="flex flex-wrap items-center gap-2.5">
           <button
             type="submit"
-            disabled={!canSubmit}
+            disabled={!canSubmit || !isAiActive}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200"
             style={{
               background: canSubmit ? 'linear-gradient(135deg, #6EE7D8 0%, #14B8A6 100%)' : 'rgba(255,255,255,0.06)',
@@ -179,10 +217,27 @@ export default function DoubtSolverPage() {
           <button
             type="button"
             onClick={() => { setQuestion(''); resetState(); }}
+            disabled={!isAiActive}
             className="px-4 py-2.5 text-xs font-medium rounded-xl transition-colors duration-150"
-            style={{ background: 'rgba(110,231,216,0.05)', border: '1px solid rgba(110,231,216,0.14)', color: '#0d9488' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(110,231,216,0.30)'; (e.currentTarget as HTMLElement).style.background = 'rgba(110,231,216,0.09)'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(110,231,216,0.14)'; (e.currentTarget as HTMLElement).style.background = 'rgba(110,231,216,0.05)'; }}
+            style={{
+              background: 'rgba(110,231,216,0.05)',
+              border: '1px solid rgba(110,231,216,0.14)',
+              color: isAiActive ? '#0d9488' : 'var(--ui-subtle)',
+              opacity: isAiActive ? 1 : 0.5,
+              cursor: isAiActive ? 'pointer' : 'not-allowed',
+            }}
+            onMouseEnter={e => {
+              if (isAiActive) {
+                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(110,231,216,0.30)';
+                (e.currentTarget as HTMLElement).style.background = 'rgba(110,231,216,0.09)';
+              }
+            }}
+            onMouseLeave={e => {
+              if (isAiActive) {
+                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(110,231,216,0.14)';
+                (e.currentTarget as HTMLElement).style.background = 'rgba(110,231,216,0.05)';
+              }
+            }}
           >
             Clear
           </button>
@@ -197,11 +252,28 @@ export default function DoubtSolverPage() {
               <button
                 key={q}
                 type="button"
+                disabled={!isAiActive}
                 onClick={() => { setQuestion(q); if (status !== 'idle') resetState(); }}
                 className="text-xs px-3 py-1.5 rounded-lg transition-all duration-150"
-                style={{ background: 'var(--ui-surface-2)', border: '1px solid var(--ui-border)', color: 'var(--ui-muted)' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(110,231,216,0.24)'; (e.currentTarget as HTMLElement).style.color = 'var(--ui-heading)'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(110,231,216,0.10)'; (e.currentTarget as HTMLElement).style.color = 'var(--ui-muted)'; }}
+                style={{
+                  background: 'var(--ui-surface-2)',
+                  border: '1px solid var(--ui-border)',
+                  color: 'var(--ui-muted)',
+                  opacity: isAiActive ? 1 : 0.5,
+                  cursor: isAiActive ? 'pointer' : 'not-allowed',
+                }}
+                onMouseEnter={e => {
+                  if (isAiActive) {
+                    (e.currentTarget as HTMLElement).style.borderColor = 'rgba(110,231,216,0.24)';
+                    (e.currentTarget as HTMLElement).style.color = 'var(--ui-heading)';
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (isAiActive) {
+                    (e.currentTarget as HTMLElement).style.borderColor = 'rgba(110,231,216,0.10)';
+                    (e.currentTarget as HTMLElement).style.color = 'var(--ui-muted)';
+                  }
+                }}
               >
                 {q}
               </button>

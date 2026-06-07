@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useFeatureStatus } from "@/hooks/useFeatureStatus";
 
 type FormState = {
 	name: string;
@@ -19,6 +20,9 @@ const initialState: FormState = {
 };
 
 export default function ContactPage() {
+	const { status: featureStatus, loading: featureLoading } = useFeatureStatus();
+	const isEmailActive = featureStatus ? featureStatus.email.active : true;
+
 	const [form, setForm] = useState<FormState>(initialState);
 	const [errors, setErrors] = useState<FormErrors>({});
 	const [successMessage, setSuccessMessage] = useState("");
@@ -200,12 +204,22 @@ export default function ContactPage() {
 							<div className="flex justify-end">
 								<button
 									type="submit"
-									disabled={isSubmitting}
+									disabled={isSubmitting || !isEmailActive}
 									className="inline-flex items-center justify-center rounded-2xl bg-teal-500 px-6 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(20,184,166,0.28)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-teal-600 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+									style={{
+										opacity: isEmailActive ? 1 : 0.6,
+										cursor: isEmailActive ? "pointer" : "not-allowed",
+									}}
 								>
 									{isSubmitting ? "Sending..." : "Submit"}
 								</button>
 							</div>
+
+							{!featureLoading && !isEmailActive && (
+								<div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+									⚠️ Email service is currently inactive because the Resend API key is not configured in environment variables.
+								</div>
+							)}
 
 							{successMessage ? (
 								<div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">

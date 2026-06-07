@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { formatLastActiveDate, getStreak, type Streak } from "@/lib/streaks";
 import { useRecommendations } from "@/hooks/useRecommendations";
 import RecommendationCard from "@/components/RecommendationCard";
+import { useFeatureStatus } from "@/hooks/useFeatureStatus";
 
 type OverviewCard = {
   title: string;
@@ -400,6 +401,9 @@ const RecommendationsSection = memo(function RecommendationsSection() {
 });
 
 export default function DashboardPage() {
+  const { status: featureStatus, loading: featureLoading } = useFeatureStatus();
+  const isAiActive = featureStatus ? featureStatus.ai.active : true;
+
   const now = useMemo(() => new Date(), []);
   const greeting = "Welcome back";
 
@@ -671,6 +675,13 @@ export default function DashboardPage() {
   }, []);
 
   const generateAiInsights = async (force = false) => {
+    if (!isAiActive) {
+      setGeneratedInsights("Productivity Insights are currently disabled because the Gemini API key is missing. Set GEMINI_API_KEY in env.local to enable them.");
+      setAiInsightsLoading(false);
+      setAiInsightsTyping(false);
+      return;
+    }
+
     const dataStateKey = `${productivitySessions}-${productivityTotalMinutes}-${taskTotal}-${taskDone}`;
 
     if (!force) {
@@ -872,12 +883,12 @@ export default function DashboardPage() {
       },
       {
         title: "AI Doubt Solver",
-        value: "—",
-        sub: "questions solved",
-        delta: "Ask a question →",
-        deltaPositive: true,
+        value: isAiActive ? "—" : "Disabled",
+        sub: isAiActive ? "questions solved" : "Missing API Key",
+        delta: isAiActive ? "Ask a question →" : "Inactive (Set GEMINI_API_KEY)",
+        deltaPositive: isAiActive,
         href: "/dashboard/doubt-solver",
-        accent: "#14B8A6",
+        accent: isAiActive ? "#14B8A6" : "#6b7280",
         icon: (
           <svg
             className="w-5 h-5"
@@ -1258,84 +1269,116 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
-          {overviewCards.map((card) => (
-            <Link
-              key={card.title}
-              href={card.href}
-              className="group flex flex-col gap-3.5 p-4 rounded-2xl transition-all duration-200"
-              style={{
-                background: "var(--ui-surface)",
-                border: "1px solid var(--ui-border)",
-                boxShadow:
-                  "0 1px 3px rgba(0,0,0,0.22), 0 4px 12px rgba(0,0,0,0.14)",
-              }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = `${card.accent}40`;
-                el.style.boxShadow = `0 6px 22px rgba(0,0,0,0.32), 0 0 18px ${card.accent}12`;
-                el.style.transform = "translateY(-3px)";
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = "rgba(110,231,216,0.11)";
-                el.style.boxShadow =
-                  "0 1px 3px rgba(0,0,0,0.22), 0 4px 12px rgba(0,0,0,0.14)";
-                el.style.transform = "translateY(0)";
-              }}
-            >
-              <div className="flex items-start justify-between">
+          {overviewCards.map((card) => {
+            const isCardDisabled = card.title === "AI Doubt Solver" && !isAiActive;
+            
+            const cardContent = (
+              <>
+                <div className="flex items-start justify-between">
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{
+                      background: `${card.accent}14`,
+                      color: card.accent,
+                      border: `1px solid ${card.accent}22`,
+                    }}
+                  >
+                    {card.icon}
+                  </div>
+                  {!isCardDisabled && (
+                    <svg
+                      className="w-3.5 h-3.5 opacity-0 group-hover:opacity-60 transition-opacity duration-200 mt-0.5"
+                      style={{ color: card.accent }}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2.2}
+                        d="M7 17L17 7M17 7H7M17 7v10"
+                      />
+                    </svg>
+                  )}
+                </div>
+
+                <div className="space-y-0.5">
+                  <p
+                    className="text-[10px] font-semibold uppercase tracking-wide"
+                    style={{ color: "var(--ui-muted)" }}
+                  >
+                    {card.title}
+                  </p>
+                  <p
+                    className="text-xl font-bold leading-tight"
+                    style={{ color: "var(--ui-heading)" }}
+                  >
+                    {card.value}
+                  </p>
+                  <p className="text-[11px]" style={{ color: "var(--ui-muted)" }}>
+                    {card.sub}
+                  </p>
+                </div>
+
+                <p
+                  className="text-[10px] font-medium truncate"
+                  style={{ color: card.deltaPositive ? card.accent : "#f87171" }}
+                >
+                  {card.delta}
+                </p>
+              </>
+            );
+
+            if (isCardDisabled) {
+              return (
                 <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                  key={card.title}
+                  className="group flex flex-col gap-3.5 p-4 rounded-2xl"
                   style={{
-                    background: `${card.accent}14`,
-                    color: card.accent,
-                    border: `1px solid ${card.accent}22`,
+                    background: "var(--ui-surface)",
+                    border: "1px solid var(--ui-border)",
+                    boxShadow:
+                      "0 1px 3px rgba(0,0,0,0.22), 0 4px 12px rgba(0,0,0,0.14)",
+                    opacity: 0.6,
+                    cursor: "not-allowed",
                   }}
                 >
-                  {card.icon}
+                  {cardContent}
                 </div>
-                <svg
-                  className="w-3.5 h-3.5 opacity-0 group-hover:opacity-60 transition-opacity duration-200 mt-0.5"
-                  style={{ color: card.accent }}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2.2}
-                    d="M7 17L17 7M17 7H7M17 7v10"
-                  />
-                </svg>
-              </div>
+              );
+            }
 
-              <div className="space-y-0.5">
-                <p
-                  className="text-[10px] font-semibold uppercase tracking-wide"
-                  style={{ color: "var(--ui-muted)" }}
-                >
-                  {card.title}
-                </p>
-                <p
-                  className="text-xl font-bold leading-tight"
-                  style={{ color: "var(--ui-heading)" }}
-                >
-                  {card.value}
-                </p>
-                <p className="text-[11px]" style={{ color: "var(--ui-muted)" }}>
-                  {card.sub}
-                </p>
-              </div>
-
-              <p
-                className="text-[10px] font-medium truncate"
-                style={{ color: card.deltaPositive ? card.accent : "#f87171" }}
+            return (
+              <Link
+                key={card.title}
+                href={card.href}
+                className="group flex flex-col gap-3.5 p-4 rounded-2xl transition-all duration-200"
+                style={{
+                  background: "var(--ui-surface)",
+                  border: "1px solid var(--ui-border)",
+                  boxShadow:
+                    "0 1px 3px rgba(0,0,0,0.22), 0 4px 12px rgba(0,0,0,0.14)",
+                  cursor: "pointer",
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.borderColor = `${card.accent}40`;
+                  el.style.boxShadow = `0 6px 22px rgba(0,0,0,0.32), 0 0 18px ${card.accent}12`;
+                  el.style.transform = "translateY(-3px)";
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.borderColor = "rgba(110,231,216,0.11)";
+                  el.style.boxShadow =
+                    "0 1px 3px rgba(0,0,0,0.22), 0 4px 12px rgba(0,0,0,0.14)";
+                  el.style.transform = "translateY(0)";
+                }}
               >
-                {card.delta}
-              </p>
-            </Link>
-          ))}
+                {cardContent}
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -1566,17 +1609,18 @@ export default function DashboardPage() {
             <button
               type="button"
               onClick={() => generateAiInsights(true)}
-              disabled={aiInsightsLoading || aiInsightsTyping}
+              disabled={aiInsightsLoading || aiInsightsTyping || !isAiActive}
               className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-200 self-start sm:self-auto"
               style={{
-                background: !aiInsightsLoading && !aiInsightsTyping
+                background: isAiActive && !aiInsightsLoading && !aiInsightsTyping
                   ? "linear-gradient(135deg,#6EE7D8,#14B8A6)"
                   : "rgba(255,255,255,0.06)",
-                color: !aiInsightsLoading && !aiInsightsTyping ? "#111827" : "var(--ui-subtle)",
-                boxShadow: !aiInsightsLoading && !aiInsightsTyping
+                color: isAiActive && !aiInsightsLoading && !aiInsightsTyping ? "#111827" : "var(--ui-subtle)",
+                boxShadow: isAiActive && !aiInsightsLoading && !aiInsightsTyping
                   ? "0 4px 12px rgba(110,231,216,0.22)"
                   : "none",
-                cursor: !aiInsightsLoading && !aiInsightsTyping ? "pointer" : "not-allowed",
+                cursor: isAiActive && !aiInsightsLoading && !aiInsightsTyping ? "pointer" : "not-allowed",
+                opacity: isAiActive ? 1 : 0.5,
               }}
             >
               {aiInsightsLoading ? (
