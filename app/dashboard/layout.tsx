@@ -193,7 +193,7 @@ export default function DashboardLayout({
 
   return (
     <div
-      className="flex min-h-screen"
+      className="flex h-screen overflow-hidden"
       style={{ background: "var(--ui-bg)" }}
     >
       {mobileOpen && (
@@ -205,7 +205,7 @@ export default function DashboardLayout({
 
       <aside
         className={`
-          fixed md:relative z-30 flex flex-col min-h-screen flex-shrink-0
+          fixed md:relative z-30 flex flex-col h-screen flex-shrink-0
           transition-all duration-300 ease-in-out
           ${mobileOpen ? "left-0" : "-left-64 md:left-0"}
         `}
@@ -374,7 +374,7 @@ export default function DashboardLayout({
                       />
                     </svg>
                     {!collapsed && (
-                      <span className="truncate leading-none">{label}</span>
+                      <span className="truncate leading-normal">{label}</span>
                     )}
                   </Link>
                 );
