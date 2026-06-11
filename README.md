@@ -38,6 +38,12 @@ The goal is simple: help students stay organized, consistent, and supported whil
 - Export notes as PDF
 - Shareable notes links
 
+### AI recommendation Features
+- Generates a personalized 7-day study timetable based on subjects, deadlines, and priorities.
+- Combines rule-based logic (urgent deadlines first) with AI for smarter recommendations.
+- Lets users add weak subjects and paste syllabus text for more tailored plans.
+- Automatically retries if the AI service is briefly down, with a backup model as a safety net.
+
 ### AI Learning Tools
 
 - AI Doubt Solver with clear academic explanations

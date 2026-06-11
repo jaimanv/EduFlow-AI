@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
 interface StudyTask {
   subject: string;
   deadline: string;
@@ -26,15 +28,95 @@ interface StudyPlanResponse {
   timetable: DaySchedule[];
 }
 
-//  Gemini client 
+// ─── Gemini client ─────────────────────────────────────────────────────────────
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY!,
 });
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const PRIMARY_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL || "gemini-2.0-flash";
 
-//  Route handler 
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 800; // base delay, doubles each retry
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Detects retryable errors: 503 / UNAVAILABLE / overloaded / rate limit
+function isRetryableError(err: unknown): boolean {
+  const message =
+    err instanceof Error ? err.message.toLowerCase() : String(err).toLowerCase();
+
+  return (
+    message.includes("503") ||
+    message.includes("unavailable") ||
+    message.includes("overloaded") ||
+    message.includes("rate limit") ||
+    message.includes("429") ||
+    message.includes("timeout")
+  );
+}
+
+/**
+ * Calls Gemini with automatic retries (for transient errors) and a fallback
+ * model if the primary model is unavailable after all retries.
+ */
+async function generateWithRetry(prompt: string): Promise<string> {
+  const models = [PRIMARY_MODEL, FALLBACK_MODEL];
+
+  for (let modelIndex = 0; modelIndex < models.length; modelIndex++) {
+    const model = models[modelIndex];
+    const isLastModel = modelIndex === models.length - 1;
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const result = await ai.models.generateContent({
+          model,
+          contents: prompt,
+        });
+
+        const text = result.text ?? "";
+        if (!text) throw new Error("Empty response from Gemini.");
+
+        return text;
+      } catch (err) {
+        const retryable = isRetryableError(err);
+        const isLastAttempt = attempt === MAX_RETRIES;
+
+        console.error(
+          `[study-plan] ${model} attempt ${attempt}/${MAX_RETRIES} failed:`,
+          err instanceof Error ? err.message : err
+        );
+
+        // If this error isn't retryable, bail out of retries for this model
+        // immediately and try the next model (if any).
+        if (!retryable) break;
+
+        // If retryable but not the last attempt, wait and retry the same model.
+        if (!isLastAttempt) {
+          await sleep(RETRY_DELAY_MS * attempt); // linear backoff: 0.8s, 1.6s, 2.4s
+          continue;
+        }
+
+        // Retryable but exhausted retries on this model.
+        // If this was the last model too, give up.
+        if (isLastModel) {
+          throw new Error(
+            "AI service is temporarily unavailable. Please try again in a moment."
+          );
+        }
+        // Otherwise fall through to try the next (fallback) model.
+      }
+    }
+  }
+
+  // Should not be reachable, but keeps TypeScript happy.
+  throw new Error("AI service is temporarily unavailable. Please try again in a moment.");
+}
+
+// ─── Route handler ─────────────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
   try {
@@ -47,10 +129,10 @@ export async function POST(req: Request) {
     const weakSubjects = String(formData.get("weakSubjects") || "");
     const syllabusText = String(formData.get("syllabusText") || "");
 
-    //  Input validation 
+    // ── Input validation ───────────────────────────────────────────────────────
     if (!process.env.GEMINI_API_KEY) {
       return NextResponse.json(
-        { error: "GEMINI_API_KEY is not configured." },
+        { error: "AI service is not configured. Please contact support." },
         { status: 500 }
       );
     }
@@ -62,7 +144,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // ── Build prompt 
+    // ── Build prompt ───────────────────────────────────────────────────────────
     const today = new Date().toISOString().split("T")[0];
 
     const prompt = `
@@ -109,18 +191,18 @@ Return ONLY valid JSON — no markdown fences, no explanation — matching this 
 }
 `;
 
-    // ── Call Gemini ────────────────────────────────────────────────────────────
-    const result = await ai.models.generateContent({
-      model: MODEL,
-      contents: prompt,
-    });
+    // ── Call Gemini (with retries + fallback model) ────────────────────────────
+    let rawText: string;
+    try {
+      rawText = await generateWithRetry(prompt);
+    } catch (err) {
+      // User-friendly message — never expose raw Gemini error details.
+      const message =
+        err instanceof Error
+          ? err.message
+          : "AI service is temporarily unavailable. Please try again in a moment.";
 
-    // `result.text` is a getter in @google/genai ≥ 0.7 — call it as a property,
-    // not a method. Older versions may use result.response.text().
-    const rawText: string = result.text ?? "";
-
-    if (!rawText) {
-      throw new Error("Empty response from Gemini.");
+      return NextResponse.json({ error: message }, { status: 503 });
     }
 
     // Strip markdown fences if the model ignores the instruction
@@ -129,7 +211,16 @@ Return ONLY valid JSON — no markdown fences, no explanation — matching this 
       .replace(/```\s*/g, "")
       .trim();
 
-    const json: StudyPlanResponse = JSON.parse(cleaned);
+    let json: StudyPlanResponse;
+    try {
+      json = JSON.parse(cleaned);
+    } catch {
+      console.error("[study-plan] Failed to parse Gemini output:", cleaned);
+      return NextResponse.json(
+        { error: "AI returned an unexpected format. Please try again." },
+        { status: 502 }
+      );
+    }
 
     // ── Validate shape ─────────────────────────────────────────────────────────
     if (
@@ -137,20 +228,20 @@ Return ONLY valid JSON — no markdown fences, no explanation — matching this 
       !Array.isArray(json.recommendations) ||
       !Array.isArray(json.timetable)
     ) {
-      throw new Error("Unexpected JSON shape from Gemini.");
+      console.error("[study-plan] Unexpected JSON shape:", json);
+      return NextResponse.json(
+        { error: "AI returned an unexpected format. Please try again." },
+        { status: 502 }
+      );
     }
 
     return NextResponse.json(json);
   } catch (error) {
-    console.error("[study-plan] Error:", error);
-
-    const message =
-      error instanceof SyntaxError
-        ? "AI returned an unexpected format. Please try again."
-        : error instanceof Error
-        ? error.message
-        : "Failed to generate study plan.";
-
-    return NextResponse.json({ error: message }, { status: 500 });
+    // Catch-all — log full details server-side, return generic message to client.
+    console.error("[study-plan] Unexpected error:", error);
+    return NextResponse.json(
+      { error: "Something went wrong while generating your study plan. Please try again." },
+      { status: 500 }
+    );
   }
 }
