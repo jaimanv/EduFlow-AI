@@ -10,7 +10,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@google/genai": "^2.8.0",   
+    "@google/genai": "^2.8.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.103.3",
     "jspdf": "^4.2.1",
