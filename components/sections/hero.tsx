@@ -9,6 +9,7 @@ const features = [
   { icon: '📝', label: 'Notes Generator' },
   { icon: '📊', label: 'Productivity Tracker' },
   { icon: '😊', label: 'Mood Tracker' },
+  { icon: '🎯', label: 'AI Study Plan'}
 ];
 
 export default function Hero() {

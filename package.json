@@ -10,12 +10,15 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@google/genai": "^2.8.0",   
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.103.3",
     "jspdf": "^4.2.1",
     "lucide-react": "^1.17.0",
+    "mammoth": "^1.12.0",
     "marked": "^18.0.4",
     "next": "^16.2.3",
+    "pdfjs-dist": "^6.0.227",
     "react": "^18",
     "react-dom": "^18",
     "react-icons": "^5.6.0",
