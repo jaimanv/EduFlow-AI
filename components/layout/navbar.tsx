@@ -88,7 +88,7 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* <div className="flex items-center justify-between h-[60px] gap-6"> */}
-        <div className="grid grid-cols-3 items-center h-[60px]">
+        <div className="flex md:grid md:grid-cols-3 items-center justify-between h-[60px]">
           <Link
             href="/"
             className="flex items-center flex-shrink-0 transition-all duration-200 hover:scale-[1.04]"
