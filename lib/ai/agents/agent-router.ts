@@ -6,6 +6,7 @@ import { agentName as productivityAgentName, runAgent as runProductivityAgent } 
 import { agentName as moodAgentName, runAgent as runMoodAgent } from "./mood-agent";
 import { agentName as timetableAgentName, runAgent as runTimetableAgent } from "./timetable-agent";
 import { agentName as recommendationAgentName, runAgent as runRecommendationAgent } from "./recommendation-agent";
+import { agentName as mindmapAgentName, runAgent as runMindmapAgent } from "./mindmap-agent";
 
 export type AgentRouterInput = {
   agentType?: AgentType | string;
@@ -41,6 +42,10 @@ const agentMap = {
   recommendation: {
     name: recommendationAgentName,
     runAgent: runRecommendationAgent,
+  },
+  mindmap: {
+    name: mindmapAgentName,
+    runAgent: runMindmapAgent,
   },
 } as const;
 
