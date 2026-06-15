@@ -8,6 +8,7 @@ import { parseNoteBlocks, stripInlineMarkdown } from "@/utils/noteFormatting";
 import { marked } from "marked";
 import { RichTextEditor } from "@/components/notes/rich-text-editor";
 import { DrawingCanvas } from "@/components/notes/drawing-canvas";
+import { useFeatureStatus } from "@/hooks/useFeatureStatus";
 
 
 type NoteRow = {
@@ -293,10 +294,10 @@ export default function NotesPage() {
   useEffect(() => {
     let alive = true;
     (async () => {
-      const { data, error: uErr } = await supabase.auth.getUser();
+      const { data, error: uErr } = await supabase.auth.getSession();
       if (!alive) return;
       if (uErr) setError(uErr.message);
-      if (data.user) await loadNotes();
+      if (data.session?.user) await loadNotes();
       else setLoading(false);
     })();
     return () => {
@@ -322,8 +323,8 @@ export default function NotesPage() {
     setSuccess(null);
     setSaving(true);
     try {
-      const { data: u } = await supabase.auth.getUser();
-      const user = u.user;
+      const { data: u } = await supabase.auth.getSession();
+      const user = u.session?.user;
       if (!user) {
         setError("You need to be logged in to create notes.");
         return;

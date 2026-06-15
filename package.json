@@ -25,13 +25,11 @@
     "jspdf": "^4.2.1",
     "lucide-react": "^1.18.0",
     "marked": "^18.0.5",
-
     "next": "^16.2.3",
     "pdfjs-dist": "^6.0.227",
     "react": "^18",
     "react-dom": "^18",
     "react-sketch-canvas": "^8.0.0",
-
     "resend": "^6.12.2"
   },
   "devDependencies": {
