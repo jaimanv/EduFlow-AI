@@ -2,6 +2,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
+import { GoChecklist } from "react-icons/go";
 import { CheckSquare, ChevronDown, ChevronUp, GripVertical, Plus, Trash2, X } from 'lucide-react';
 
 type Task = {
