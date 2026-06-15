@@ -112,11 +112,11 @@ export default function DashboardLayout({
     let mounted = true;
 
     (async () => {
-      const { data } = await supabase.auth.getUser();
+      const { data } = await supabase.auth.getSession();
       if (!mounted) return;
-      setUser(data.user ?? null);
+      setUser(data.session?.user ?? null);
       setAuthReady(true);
-      if (!data.user) router.replace(nextPathForLogin);
+      if (!data.session?.user) router.replace(nextPathForLogin);
     })();
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
