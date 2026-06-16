@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import React from 'react';
 
 const features = [
   {
@@ -78,6 +79,21 @@ const features = [
     tag: 'Wellness',
     href: '/dashboard/mood',
   },
+  {
+    title: 'Weekly Productivity Graph',
+    details:
+      'Monitor your progress with beautifully rendered visual analytics. Track trends, analyze focus hours, and stay completely consistent.',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} 
+          d="M7 12l3-3 3 3 4-4M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+      </svg>
+    ),
+    accent: '#5EEAD4',
+    accentBg: 'rgba(94,234,212,0.10)',
+    tag: 'Analytics',
+    href: '/dashboard/productivity',
+  },
 ];
 
 export default function Features() {
@@ -121,7 +137,7 @@ export default function Features() {
             }}
           >
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#6ee7d8' }} />
-            Five tools. One workspace.
+            Six tools. One workspace.
           </div>
 
           <h2
@@ -157,11 +173,8 @@ export default function Features() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 mb-5">
-          {features.slice(0, 3).map(f => <FeatureCard key={f.title} {...f} />)}
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {features.slice(3).map(f => <FeatureCard key={f.title} {...f} wide />)}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {features.map(f => <FeatureCard key={f.title} {...f} />)}
         </div>
 
       </div>
@@ -183,7 +196,6 @@ type CardProps = {
   accentBg: string;
   tag: string;
   href: string;
-  wide?: boolean;
 };
 
 function FeatureCard({ title, details, icon, accent, accentBg, tag, href }: CardProps) {
