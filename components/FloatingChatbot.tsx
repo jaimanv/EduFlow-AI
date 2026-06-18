@@ -270,25 +270,40 @@ export default function FloatingChatbot() {
       {/* Popup Dialog Window */}
       {visible && (
         <div 
-          className="fixed bottom-24 right-6 md:right-28 z-[1000] w-[350px] md:w-[380px] h-[500px] max-h-[70vh] flex flex-col rounded-2xl border border-teal-400/30 bg-gradient-to-b from-[#0a1428] to-[#0f172a] shadow-[0_0_0_1px_rgba(45,212,191,0.12),0_20px_60px_rgba(0,0,0,0.7)] backdrop-blur-xl overflow-hidden"
+          className="fixed bottom-24 right-6 md:right-28 z-[1000] w-[350px] md:w-[380px] h-[500px] max-h-[70vh] flex flex-col rounded-2xl border shadow-2xl overflow-hidden"
+          style={{
+            background: "var(--ui-surface)",
+            borderColor: "var(--ui-border)"
+          }}
         >
           {/* Header */}
-          <header className="p-4 border-b border-teal-500/10 flex items-center justify-between bg-black/10 flex-shrink-0">
+          <header 
+            className="p-4 border-b flex items-center justify-between flex-shrink-0"
+            style={{
+              borderBottomColor: "var(--ui-border)",
+              background: "var(--ui-surface-2)"
+            }}
+          >
             <div className="min-w-0 flex-1">
               {sessions.length > 0 ? (
                 <select
                   value={activeSessionId || ""}
                   onChange={(e) => setActiveSessionId(e.target.value || null)}
-                  className="bg-transparent text-xs font-bold text-teal-100 outline-none max-w-full cursor-pointer hover:text-white transition-colors"
+                  className="bg-transparent text-xs font-bold outline-none max-w-full cursor-pointer transition-colors"
+                  style={{ color: "var(--ui-text)" }}
                 >
                   {sessions.map((s) => (
-                    <option key={s.id} value={s.id} className="bg-[#0f172a] text-slate-100">
+                    <option 
+                      key={s.id} 
+                      value={s.id} 
+                      className="bg-white dark:bg-[#1e293b] text-gray-900 dark:text-slate-100"
+                    >
                       {s.title}
                     </option>
                   ))}
                 </select>
               ) : (
-                <h3 className="text-xs font-bold text-teal-100">AI Assistant</h3>
+                <h3 className="text-xs font-bold" style={{ color: "var(--ui-heading)" }}>AI Assistant</h3>
               )}
             </div>
             
@@ -296,7 +311,7 @@ export default function FloatingChatbot() {
               <button
                 onClick={startNewChat}
                 title="New conversation"
-                className="p-1 rounded text-teal-300 hover:text-white hover:bg-teal-500/10 transition-colors"
+                className="p-1 rounded text-teal-600 dark:text-teal-400 hover:bg-teal-500/10 transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M12 4v16m8-8H4" />
@@ -305,7 +320,8 @@ export default function FloatingChatbot() {
               <button
                 onClick={() => setVisible(false)}
                 title="Close chat"
-                className="p-1 rounded text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+                className="p-1 rounded transition-colors"
+                style={{ color: "var(--ui-muted)" }}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -320,7 +336,7 @@ export default function FloatingChatbot() {
               <svg className="w-10 h-10 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <p className="text-xs text-slate-300">
+              <p className="text-xs" style={{ color: "var(--ui-text)" }}>
                 Setup required: Run the SQL database script to enable the persistent chatbot.
               </p>
               <button
@@ -336,11 +352,11 @@ export default function FloatingChatbot() {
               <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin">
                 {messages.length === 0 && !sending ? (
                   <div className="h-full flex flex-col items-center justify-center text-center space-y-3 py-10 opacity-70">
-                    <svg className="w-8 h-8 text-teal-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-8 h-8 text-teal-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
-                    <p className="text-xs text-teal-100 font-medium">Hello! Ask me anything.</p>
-                    <p className="text-[10px] text-slate-400 max-w-[200px]">I can help write code, solve academic doubts, or draft notes.</p>
+                    <p className="text-xs font-semibold" style={{ color: "var(--ui-heading)" }}>Hello! Ask me anything.</p>
+                    <p className="text-[10px] max-w-[200px]" style={{ color: "var(--ui-muted)" }}>I can help write code, solve academic doubts, or draft notes.</p>
                   </div>
                 ) : (
                   messages.map((msg) => {
@@ -348,11 +364,12 @@ export default function FloatingChatbot() {
                     return (
                       <div key={msg.id} className={`flex gap-2.5 ${isUser ? "justify-end" : "justify-start"}`}>
                         <div
-                          className={`rounded-2xl px-3.5 py-2.5 max-w-[85%] text-xs shadow-sm border ${
-                            isUser
-                              ? "bg-teal-500/10 text-teal-200 border-teal-500/20"
-                              : "bg-slate-800/60 text-slate-100 border-slate-700/50"
-                          }`}
+                          className="rounded-2xl px-3.5 py-2.5 max-w-[85%] text-xs shadow-sm border transition-colors duration-200"
+                          style={{
+                            background: isUser ? "rgba(20, 184, 166, 0.06)" : "var(--ui-surface)",
+                            borderColor: isUser ? "rgba(20, 184, 166, 0.15)" : "var(--ui-border)",
+                            color: "var(--ui-text)"
+                          }}
                         >
                           <FormattedNote content={msg.content} emptyText="" />
                         </div>
@@ -364,7 +381,13 @@ export default function FloatingChatbot() {
                 {/* Sending state typing loader */}
                 {sending && (
                   <div className="flex gap-2.5 justify-start">
-                    <div className="rounded-2xl px-3.5 py-2.5 bg-slate-800/60 border border-slate-700/50 flex items-center gap-1">
+                    <div 
+                      className="rounded-2xl px-3.5 py-2.5 border flex items-center gap-1"
+                      style={{
+                        background: "var(--ui-surface)",
+                        borderColor: "var(--ui-border)",
+                      }}
+                    >
                       <span className="w-1 h-1 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
                       <span className="w-1 h-1 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
                       <span className="w-1 h-1 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
@@ -377,7 +400,14 @@ export default function FloatingChatbot() {
 
               {/* Error block */}
               {error && (
-                <div className="px-4 py-2 border-t border-red-500/10 bg-red-500/5 text-[10px] text-red-400 flex items-start gap-1 flex-shrink-0">
+                <div 
+                  className="px-4 py-2 border-t text-[10px] flex items-start gap-1 flex-shrink-0"
+                  style={{
+                    background: "rgba(239, 68, 68, 0.05)",
+                    borderTopColor: "rgba(239, 68, 68, 0.1)",
+                    color: "rgba(239, 68, 68, 0.8)"
+                  }}
+                >
                   <svg className="w-3.5 h-3.5 mt-0.5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -386,13 +416,23 @@ export default function FloatingChatbot() {
               )}
 
               {/* Input Area */}
-              <footer className="p-3 border-t border-teal-500/10 flex-shrink-0 bg-black/5">
+              <footer 
+                className="p-3 border-t flex-shrink-0"
+                style={{
+                  borderTopColor: "var(--ui-border)",
+                  background: "var(--ui-surface-2)"
+                }}
+              >
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
                     sendMessage();
                   }}
-                  className="flex items-end gap-1.5 rounded-xl border border-teal-500/20 bg-slate-900/60 p-1.5"
+                  className="flex items-end gap-1.5 rounded-xl border p-1.5"
+                  style={{
+                    borderColor: "var(--ui-border)",
+                    background: "var(--ui-surface)"
+                  }}
                 >
                   <textarea
                     ref={inputRef}
@@ -406,19 +446,20 @@ export default function FloatingChatbot() {
                       }
                     }}
                     placeholder="Message..."
-                    className="flex-1 bg-transparent px-2 py-1 outline-none resize-none text-xs text-white max-h-24 min-h-[28px]"
+                    className="flex-1 bg-transparent px-2 py-1 outline-none resize-none text-xs max-h-24 min-h-[28px]"
+                    style={{ color: "var(--ui-text)" }}
                   />
                   <button
                     type="submit"
                     disabled={sending || !input.trim()}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors"
+                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200"
                     style={{
-                      background: input.trim() && !sending ? "linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%)" : "rgba(255,255,255,0.03)",
-                      color: input.trim() && !sending ? "#0a1428" : "#64748b",
+                      background: input.trim() && !sending ? "linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%)" : "var(--ui-surface-2)",
+                      color: input.trim() && !sending ? "#0a1428" : "var(--ui-subtle)",
                       cursor: input.trim() && !sending ? "pointer" : "not-allowed",
                     }}
                   >
-                    <svg className="w-4 h-4 transform rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 transform rotate-45 -translate-x-0.5 translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                     </svg>
                   </button>
