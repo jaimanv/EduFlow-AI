@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "prepare": "husky"
+    "prepare": "husky",
+    "install-nextjs-docs": "npx @next/codemod@canary agents-md"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.2",
