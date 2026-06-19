@@ -2,6 +2,19 @@
 
 AI-powered student productivity assistant. Next.js 16 App Router + Supabase (PostgreSQL + Auth + RLS) + Tailwind CSS + Gemini/OpenRouter AI.
 
+## Skills
+
+Installed in `.agents/skills/`.
+
+| Skill                              | What it does                                                                                    |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `conventional-commit`              | Reads your git diff and writes a properly formatted Conventional Commit message for you         |
+| `core-web-vitals`                  | Audits and fixes LCP, INP, and CLS scores to improve page speed and Google ranking              |
+| `deploy-to-vercel`                 | Deploys the app to Vercel (preview by default, production on request)                           |
+| `seo-audit`                        | Audits the site for SEO issues — meta tags, crawlability, indexing, page speed, rankings        |
+| `supabase-postgres-best-practices` | Reviews and optimizes SQL queries and schema design against Supabase/Postgres performance rules |
+| `wcag-audit-patterns`              | Audits the app for WCAG 2.2 accessibility violations and guides fixes                           |
+
 ## Commands
 
 ```bash
