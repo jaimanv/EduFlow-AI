@@ -87,7 +87,6 @@ export default function Navbar() {
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* <div className="flex items-center justify-between h-[60px] gap-6"> */}
         <div className="flex md:grid md:grid-cols-3 items-center justify-between h-[60px]">
           <Link
             href="/"
@@ -96,6 +95,8 @@ export default function Navbar() {
             <img
               src="/images/logo.png"
               alt="EduFlow AI"
+              width={144}
+              height={48}
               style={{
                 height: "48px",
                 width: "auto",
@@ -129,7 +130,7 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* <div className="hidden md:flex items-center gap-2.5 flex-shrink-0"> */}
+       
           <div className="hidden px-9 py-2 md:flex items-center gap-3 flex-shrink-0">
 
             {authReady && user ? (
