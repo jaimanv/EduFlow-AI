@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "../components/layout/navbar";
 import Footer from "../components/layout/footer";
+import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { checkEnvStatus } from "../lib/env-check";
 
@@ -58,6 +59,7 @@ export default function RootLayout({
           <Navbar />
           <main className="min-h-screen">{children}</main>
           <Footer />
+          <Toaster position="top-center"  />
         </ThemeProvider>
       </body>
     </html>
