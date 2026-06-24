@@ -1,9 +1,11 @@
-import React from 'react';
+import Link from "next/link";
+import React from "react";
 
 const features = [
   // --- ORIGINAL 5 FEATURES ---
   {
     title: 'Study Planner',
+    href: '/dashboard/study-planner',
     details:
       'Organise your entire semester in minutes. Set tasks, deadlines, and daily goals — and let AI optimise your schedule automatically.',
     icon: (
@@ -17,6 +19,7 @@ const features = [
   },
   {
     title: 'AI Doubt Solver',
+    href: '/dashboard/doubt-solver',
     details:
       'Ask any academic question and get clear, instant explanations with examples — across every subject, 24 hours a day.',
     icon: (
@@ -30,6 +33,7 @@ const features = [
   },
   {
     title: 'Notes Generator',
+    href: '/dashboard/notes',
     details:
       'Paste any lecture or topic and get structured, revision-ready notes in seconds. Clean formatting. Zero effort.',
     icon: (
@@ -43,6 +47,7 @@ const features = [
   },
   {
     title: 'Productivity Tracker',
+    href: '/dashboard/productivity',
     details:
       'Visualise your focus time, streaks, and completion rates. Stay consistent with gentle nudges and weekly insights.',
     icon: (
@@ -56,6 +61,7 @@ const features = [
   },
   {
     title: 'Mood Tracker',
+    href: '/dashboard/mood',
     details:
       'Track your daily mood, reflect on patterns, and build healthier study habits with simple emotional check-ins.',
     icon: (
@@ -71,6 +77,7 @@ const features = [
   // --- NEW 3 FEATURES ---
   {
     title: 'Weekly Timetable',
+    href: '/dashboard/timetable',
     details:
       'Plan your weekly lectures, study blocks, and assignments. Stay on top of your schedule with a clean, intuitive, and interactive layout.',
     icon: (
@@ -84,6 +91,7 @@ const features = [
   },
   {
     title: 'Study Rooms',
+    href: '/dashboard/study-rooms',
     details:
       'Join or host collaborative virtual environments. Study together with peers, share resources, and keep each other accountable in real-time.',
     icon: (
@@ -97,6 +105,7 @@ const features = [
   },
   {
     title: 'AI Recommender',
+    href: '/dashboard/ai_recommender',
     details:
       'Get personalized resource suggestions, study insights, and material updates driven by advanced algorithms tailored to your curriculum.',
     icon: (
@@ -125,9 +134,11 @@ export default function Features() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <div 
+            <Link
               key={index}
-              className="relative p-8 rounded-2xl border border-slate-100 bg-white shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between"
+              href={feature.href}
+              aria-label={`Open ${feature.title}`}
+              className="group relative p-8 rounded-2xl border border-slate-100 bg-white shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#14B8A6] focus-visible:ring-offset-2"
             >
               <div>
                 <div className="flex items-center justify-between mb-6">
@@ -144,7 +155,7 @@ export default function Features() {
                 <h3 className="text-xl font-bold text-slate-800 mb-3">{feature.title}</h3>
                 <p className="text-slate-500 text-sm leading-relaxed">{feature.details}</p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
