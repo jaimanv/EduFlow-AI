@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import toast from "react-hot-toast";
 
 export default function RoomTimer({ roomId, initialStatus, initialDuration = 25 }: { roomId: string, initialStatus: string, initialDuration?: number }) {
   const [timeLeft, setTimeLeft] = useState(initialDuration * 60);
@@ -22,15 +23,26 @@ export default function RoomTimer({ roomId, initialStatus, initialDuration = 25 
     return () => clearInterval(interval);
   }, [status]);
 
-  const toggleTimer = async () => {
-    const newStatus = status === 'running' ? 'stopped' : 'running';
-    setStatus(newStatus);
-    if (newStatus === 'running') setTimeLeft(initialDuration * 60);
-    
-    await supabase.from("study_rooms").update({ 
-      timer_status: newStatus 
-    }).eq("id", roomId);
-  };
+const toggleTimer = async () => {
+    const newStatus = status === "running" ? "stopped" : "running"
+    const previousStatus = status
+
+    setStatus(newStatus)
+    if (newStatus === "running") setTimeLeft(initialDuration * 60)
+
+    try {
+        const { error } = await supabase
+            .from("study_rooms")
+            .update({ timer_status: newStatus })
+            .eq("id", roomId)
+
+        if (error) throw error
+    } catch (err) {
+        console.error("Failed to update timer:", err)
+        setStatus(previousStatus)
+        toast.error("Couldn't update timer. Please try again.") 
+    }
+}
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;

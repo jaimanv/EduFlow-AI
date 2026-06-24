@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "prepare": "husky"
+    "prepare": "husky",
+    "install-nextjs-docs": "npx @next/codemod@canary agents-md"
   },
   "dependencies": {
     "@google/genai": "^2.8.0",
@@ -29,6 +30,7 @@
     "pdfjs-dist": "^6.0.227",
     "react": "^18",
     "react-dom": "^18",
+    "react-hot-toast": "^2.6.0",
     "react-icons": "^5.6.0",
     "react-sketch-canvas": "^8.0.0",
     "resend": "^6.12.2"

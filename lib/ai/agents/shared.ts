@@ -319,3 +319,208 @@ async function runOpenRouterCompletion({
 
   return content;
 }
+
+export async function runChatCompletion({
+  systemPrompt,
+  messages,
+  temperature = 0.5,
+  maxTokens = 1500,
+}: {
+  systemPrompt: string;
+  messages: Array<{ role: "user" | "assistant"; content: string }>;
+  temperature?: number;
+  maxTokens?: number;
+}) {
+  if (!messages || messages.length === 0) {
+    throw new Error("Conversation history is required.");
+  }
+
+  const provider = (process.env.AI_PROVIDER || "openrouter")
+    .trim()
+    .toLowerCase();
+
+  if (provider === "gemini") {
+    try {
+      return await runGeminiChatCompletion({
+        systemPrompt,
+        messages,
+        temperature,
+        maxTokens,
+      });
+    } catch (geminiError) {
+      const message =
+        geminiError instanceof Error ? geminiError.message : "Gemini failed.";
+      console.error("[runChatCompletion] Gemini error:", message);
+
+      if (!process.env.OPENAI_API_KEY) {
+        throw new Error(
+          `Gemini request failed and no OpenRouter fallback key is configured: ${message}`,
+        );
+      }
+
+      console.warn("[runChatCompletion] Falling back to OpenRouter.");
+    }
+  }
+
+  return runOpenRouterChatCompletion({
+    systemPrompt,
+    messages,
+    temperature,
+    maxTokens,
+  });
+}
+
+async function runGeminiChatCompletion({
+  systemPrompt,
+  messages,
+  temperature,
+  maxTokens,
+}: {
+  systemPrompt: string;
+  messages: Array<{ role: "user" | "assistant"; content: string }>;
+  temperature: number;
+  maxTokens: number;
+}) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("Server is missing GEMINI_API_KEY.");
+  }
+
+  const model = DEFAULT_GEMINI_MODEL.trim();
+  if (!model) {
+    throw new Error("Server is missing GEMINI_MODEL.");
+  }
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+    model,
+  )}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+  // Map user/assistant turns to user/model roles for Gemini API
+  const contents = messages.map((msg) => ({
+    role: msg.role === "assistant" ? "model" : "user",
+    parts: [{ text: msg.content }],
+  }));
+
+  const body = JSON.stringify({
+    systemInstruction: {
+      parts: [{ text: `${systemPrompt}\nKeep the response clean and format with Markdown.` }],
+    },
+    contents,
+    generationConfig: {
+      temperature,
+      maxOutputTokens: Math.max(maxTokens, 8192),
+    },
+  });
+
+  console.log("[runChatCompletion] Gemini request:", {
+    model,
+    provider: "gemini",
+    messageCount: messages.length,
+  });
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+    });
+  } catch (fetchError) {
+    const errorMsg =
+      fetchError instanceof Error ? fetchError.message : "Network error";
+    throw new Error(`Gemini network error: ${errorMsg}`);
+  }
+
+  let data: GeminiResponse;
+  try {
+    data = (await response.json()) as GeminiResponse;
+  } catch (parseError) {
+    const errorMsg =
+      parseError instanceof Error ? parseError.message : "JSON parse error";
+    throw new Error(`Failed to parse Gemini response: ${errorMsg}`);
+  }
+
+  if (!response.ok) {
+    throw new Error(data?.error?.message || `Gemini HTTP ${response.status}`);
+  }
+
+  const content = getTextFromGeminiResponse(data);
+  if (!content) {
+    throw new Error("Gemini returned an empty response.");
+  }
+
+  return content;
+}
+
+async function runOpenRouterChatCompletion({
+  systemPrompt,
+  messages,
+  temperature,
+  maxTokens,
+}: {
+  systemPrompt: string;
+  messages: Array<{ role: "user" | "assistant"; content: string }>;
+  temperature: number;
+  maxTokens: number;
+}) {
+  const apiMessages = [
+    { role: "system" as const, content: systemPrompt },
+    ...messages.map((msg) => ({
+      role: msg.role === "assistant" ? ("assistant" as const) : ("user" as const),
+      content: msg.content,
+    })),
+  ];
+
+  const url = resolveChatCompletionsUrl(DEFAULT_BASE_URL);
+  const headers = buildHeaders();
+  const body = JSON.stringify({
+    model: DEFAULT_MODEL,
+    messages: apiMessages,
+    temperature,
+    max_tokens: maxTokens,
+  });
+
+  console.log("[runChatCompletion] Request details:", {
+    url,
+    model: DEFAULT_MODEL,
+    messageCount: apiMessages.length,
+  });
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      headers,
+      body,
+    });
+  } catch (fetchError) {
+    const errorMsg =
+      fetchError instanceof Error ? fetchError.message : "Network error";
+    console.error("[runChatCompletion] Fetch error:", errorMsg);
+    throw new Error(`Network error: ${errorMsg}`);
+  }
+
+  let data: ChatCompletionResponse;
+  try {
+    data = (await response.json()) as ChatCompletionResponse;
+  } catch (parseError) {
+    const errorMsg =
+      parseError instanceof Error ? parseError.message : "JSON parse error";
+    console.error("[runChatCompletion] JSON parse error:", errorMsg);
+    throw new Error(`Failed to parse response: ${errorMsg}`);
+  }
+
+  if (!response.ok) {
+    const errorMsg = data?.error?.message || `HTTP ${response.status}`;
+    console.error("[runChatCompletion] API error:", errorMsg);
+    throw new Error(`AI provider returned error: ${errorMsg}`);
+  }
+
+  const content = data.choices?.[0]?.message?.content?.trim();
+  if (!content) {
+    console.error("[runChatCompletion] Empty response from AI");
+    throw new Error("AI returned an empty response.");
+  }
+
+  return content;
+}
