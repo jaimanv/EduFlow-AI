@@ -35,8 +35,16 @@ The goal is simple: help students stay organized, consistent, and supported whil
 
 - Notes CRUD with organized note management
 - AI Notes Generator for prompt-based study notes
+- Rich text editing with formatting tools
+- Drawing and annotation support
 - Export notes as PDF
 - Shareable notes links
+
+### Flashcards
+
+- AI-powered flashcard creation
+- Spaced Repetition System (SRS) for efficient revision
+- Intelligent review scheduling for long-term memory retention
 
 ### AI recommendation Features
 - Generates a personalized 7-day study timetable based on subjects, deadlines, and priorities.
@@ -47,7 +55,9 @@ The goal is simple: help students stay organized, consistent, and supported whil
 ### AI Learning Tools
 
 - AI Doubt Solver with clear academic explanations
+- AI Chat Assistant for brainstorming, explanations, writing assistance, and academic guidance
 - AI-generated study notes from topics or learning goals
+- AI-powered Mind Map generation for visual learning
 - AI Recommendations ("Smart Study Actions") for personalized study strategies
 - Multi-agent AI architecture with specialized agents
 - LLM-powered academic assistance

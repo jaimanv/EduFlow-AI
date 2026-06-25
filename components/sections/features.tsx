@@ -117,6 +117,63 @@ const features = [
     accentBg: 'rgba(20,184,166,0.10)',
     tag: 'AI-Powered',
   },
+  {
+  title: 'AI Chat Assistant',
+  href: '/dashboard/chat',
+  details:
+    'Chat with an intelligent AI assistant for brainstorming, explanations, writing assistance, and personalized academic guidance whenever you need it.',
+  icon: (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.8}
+        d="M8 10h8M8 14h5m-9 6l2.293-2.293A1 1 0 015 17h11a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+      />
+    </svg>
+  ),
+  accent: '#14B8A6',
+  accentBg: 'rgba(20,184,166,0.10)',
+  tag: 'AI-Powered',
+},
+{
+  title: 'Flashcards',
+  href: '/dashboard/flashcards',
+  details:
+    'Create AI-powered flashcards and review them using spaced repetition techniques to improve retention and make revision more effective.',
+  icon: (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.8}
+        d="M7 7h10M7 11h10M7 15h6M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"
+      />
+    </svg>
+  ),
+  accent: '#14B8A6',
+  accentBg: 'rgba(20,184,166,0.10)',
+  tag: 'Learning',
+},
+{
+  title: 'AI Mind Maps',
+  href: '/dashboard/mind-maps',
+  details:
+    'Generate interactive visual mind maps from any topic to simplify complex concepts, improve understanding, and speed up revision.',
+  icon: (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.8}
+        d="M12 6a2 2 0 100-4 2 2 0 000 4zm0 16a2 2 0 100 4 2 2 0 000-4zm6-8a2 2 0 100-4 2 2 0 000 4zM6 18a2 2 0 100-4 2 2 0 000 4zm1.5-2.5L10 13m4-2l2-1m-4-4v8"
+      />
+    </svg>
+  ),
+  accent: '#14B8A6',
+  accentBg: 'rgba(20,184,166,0.10)',
+  tag: 'AI-Powered',
+},
 ];
 
 export default function Features() {
